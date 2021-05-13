@@ -262,7 +262,6 @@ static void CreateConsole()
 	AllocConsole();
 	freopen_s(&f, "CONOUT$", "w", stdout);
 	SetConsoleTitleA("ScriptHookVDotNet Console");
-	MessageBox(NULL, (L"CALLLED THING"), (L""), 0);
 	std::cout << "Console allocated, ready for use" << std::endl;
 }
 
@@ -276,7 +275,6 @@ static void ScriptMain()
 	// Check if our CLR fiber already exists. It should be created only once for the entire lifetime of the game process.
 	if (sScriptFiber == nullptr)
 	{
-		MessageBox(NULL, (L"BEGIN THING"), (L""), 0);
 		CreateConsole();
 
 		const LPFIBER_START_ROUTINE FiberMain = [](LPVOID lpFiberParameter) {
