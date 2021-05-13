@@ -173,7 +173,7 @@ static void ScriptHookVDotnet_ManagedInit()
 			SHVDN::Console::typeid->Assembly->Location, SHVDN::Console::typeid->FullName);
 
 		// Print welcome message
-		console->PrintInfo("~c~--- Community Script Hook V .NET " SHVDN_VERSION " ---");
+		console->PrintInfo("~c~--- Community Script Hook V .NET (UNOFFICIAL --- CONSOLE TESTING) " SHVDN_VERSION " ---");
 		console->PrintInfo("~c~--- Type \"Help()\" to print an overview of available commands ---");
 
 		// Update console pointer in script domain
@@ -251,9 +251,22 @@ static void ScriptHookVDotnet_ManagedKeyboardMessage(unsigned long keycode, bool
 
 #include <Main.h>
 #include <Windows.h>
+#include <iostream>
 
 PVOID sGameFiber = nullptr;
 PVOID sScriptFiber = nullptr;
+HWND consoleWindow = nullptr;
+HANDLE outputHandle = nullptr;
+
+static void CreateConsole()
+{
+	FILE* f;
+	AllocConsole();
+	freopen_s(&f, "CONOUT$", "w", stdout);
+	SetConsoleTitleA("ScriptHookVDotNet Console");
+	MessageBox(NULL, (L"CALLLED THING"), (L""), 0);
+	std::cout << "Console allocated, ready for use" << std::endl;
+}
 
 static void ScriptMain()
 {
@@ -265,6 +278,9 @@ static void ScriptMain()
 	// Check if our CLR fiber already exists. It should be created only once for the entire lifetime of the game process.
 	if (sScriptFiber == nullptr)
 	{
+		MessageBox(NULL, (L"BEGIN THING"), (L""), 0);
+		CreateConsole();
+
 		const LPFIBER_START_ROUTINE FiberMain = [](LPVOID lpFiberParameter) {
 			// Main script execution loop
 			while (true)
