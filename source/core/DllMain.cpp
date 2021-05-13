@@ -255,8 +255,6 @@ static void ScriptHookVDotnet_ManagedKeyboardMessage(unsigned long keycode, bool
 
 PVOID sGameFiber = nullptr;
 PVOID sScriptFiber = nullptr;
-HWND consoleWindow = nullptr;
-HANDLE outputHandle = nullptr;
 
 static void CreateConsole()
 {
