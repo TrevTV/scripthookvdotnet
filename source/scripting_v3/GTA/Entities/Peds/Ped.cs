@@ -98,8 +98,11 @@ namespace GTA
 
 		/// <summary>
 		/// Determines if this <see cref="Ped"/> exists.
+		/// You should ensure <see cref="Ped"/>s still exist before manipulating them or getting some values for them on every tick, since some native functions may crash the game if invalid entity handles are passed.
 		/// </summary>
-		/// <returns><c>true</c> if this <see cref="Ped"/> exists; otherwise, <c>false</c></returns>
+		/// <returns><see langword="true" /> if this <see cref="Ped"/> exists; otherwise, <see langword="false" /></returns>
+		/// <seealso cref="Entity.IsDead"/>
+		/// <seealso cref="IsInjured"/>
 		public new bool Exists()
 		{
 			return EntityType == EntityType.Ped;
@@ -111,7 +114,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Ped"/> is human.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Ped"/> is human; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Ped"/> is human; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsHuman => Function.Call<bool>(Hash.IS_PED_HUMAN, Handle);
 
@@ -165,16 +168,12 @@ namespace GTA
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.SweatOffset == 0)
 				{
-					return 0;
+					return 0.0f;
 				}
 
-				int offset = (Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x11A0 : 0x1170);
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x11B0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x11C0 : offset;
-
-				return SHVDN.NativeMemory.ReadFloat(address + offset);
+				return SHVDN.NativeMemory.ReadFloat(address + SHVDN.NativeMemory.SweatOffset);
 			}
 			set
 			{
@@ -217,48 +216,45 @@ namespace GTA
 		#region Configuration
 
 		/// <summary>
-		/// Gets or sets how much Armor this <see cref="Ped"/> is wearing.
+		/// Gets or sets how much armor this <see cref="Ped"/> is wearing as an <see cref="int"/>.
 		/// </summary>
-		/// <remarks>if you need to get or set the value strictly, use <see cref="ArmorFloat"/> instead.</remarks>
+		/// <remarks>if you need to get or set the value precisely, use <see cref="ArmorFloat"/> instead.</remarks>
+		/// <value>
+		/// The armor as an <see cref="int"/>.
+		/// </value>
 		public int Armor
 		{
 			get => Function.Call<int>(Hash.GET_PED_ARMOUR, Handle);
 			set => Function.Call(Hash.SET_PED_ARMOUR, Handle, value);
 		}
 
+		/// <summary>
+		/// Gets or sets how much Armor this <see cref="Ped"/> is wearing as a <see cref="float"/>.
+		/// </summary>
+		/// <value>
+		/// The armor as a <see cref="float"/>.
+		/// </value>
 		public float ArmorFloat
 		{
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.ArmorOffset == 0)
 				{
 					return 0.0f;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1474 : 0x1464;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x14A0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x14B0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x14B8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x14E0 : offset;
-
-				return SHVDN.NativeMemory.ReadFloat(address + offset);
+				return SHVDN.NativeMemory.ReadFloat(address + SHVDN.NativeMemory.ArmorOffset);
 			}
 			set
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.ArmorOffset == 0)
 				{
 					return;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1474 : 0x1464;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x14A0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x14B0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x14B8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x14E0 : offset;
-
-				SHVDN.NativeMemory.WriteFloat(address + offset, value);
+				SHVDN.NativeMemory.WriteFloat(address + SHVDN.NativeMemory.ArmorOffset, value);
 			}
 		}
 
@@ -275,7 +271,7 @@ namespace GTA
 		/// Gets or sets the maximum health of this <see cref="Ped"/> as an <see cref="int"/>.
 		/// </summary>
 		/// <value>
-		/// The maximum health as an integer.
+		/// The maximum health as an <see cref="int"/>.
 		/// </value>
 		public override int MaxHealth
 		{
@@ -358,7 +354,7 @@ namespace GTA
 		///  If permanent events are blocked, this <see cref="Ped"/> will only do as it's told, and won't flee when shot at, etc.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if permanent events are blocked; otherwise, <c>false</c>.
+		///   <see langword="true" /> if permanent events are blocked; otherwise, <see langword="false" />.
 		/// </value>
 		public bool BlockPermanentEvents
 		{
@@ -504,7 +500,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Ped"/> is jumping out of their vehicle.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Ped"/> is jumping out of their vehicle; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Ped"/> is jumping out of their vehicle; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsJumpingOutOfVehicle => Function.Call<bool>(Hash.IS_PED_JUMPING_OUT_OF_VEHICLE, Handle);
 
@@ -552,7 +548,7 @@ namespace GTA
 		/// <summary>
 		/// Gets the last <see cref="Vehicle"/> this <see cref="Ped"/> used.
 		/// </summary>
-		/// <remarks>returns <c>null</c> if the last vehicle doesn't exist.</remarks>
+		/// <remarks>returns <see langword="null" /> if the last vehicle doesn't exist.</remarks>
 		public Vehicle LastVehicle
 		{
 			get
@@ -565,7 +561,7 @@ namespace GTA
 		/// <summary>
 		/// Gets the current <see cref="Vehicle"/> this <see cref="Ped"/> is using.
 		/// </summary>
-		/// <remarks>returns <c>null</c> if this <see cref="Ped"/> isn't in a <see cref="Vehicle"/>.</remarks>
+		/// <remarks>returns <see langword="null" /> if this <see cref="Ped"/> isn't in a <see cref="Vehicle"/>.</remarks>
 		public Vehicle CurrentVehicle
 		{
 			get
@@ -578,7 +574,7 @@ namespace GTA
 		/// <summary>
 		/// Gets the <see cref="Vehicle"/> this <see cref="Ped"/> is trying to enter.
 		/// </summary>
-		/// <remarks>returns <c>null</c> if this <see cref="Ped"/> isn't trying to enter a <see cref="Vehicle"/>.</remarks>
+		/// <remarks>returns <see langword="null" /> if this <see cref="Ped"/> isn't trying to enter a <see cref="Vehicle"/>.</remarks>
 		public Vehicle VehicleTryingToEnter
 		{
 			get
@@ -599,17 +595,12 @@ namespace GTA
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.SeatIndexOffset == 0)
 				{
 					return VehicleSeat.None;
 				}
 
-				int offset = (Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x1588 : 0x1540);
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x1598 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x15A0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x15C8 : offset;
-
-				int seatIndex = (sbyte)SHVDN.NativeMemory.ReadByte(address + offset);
+				int seatIndex = (sbyte)SHVDN.NativeMemory.ReadByte(address + SHVDN.NativeMemory.SeatIndexOffset);
 				return (seatIndex >= 0 && IsInVehicle()) ? (VehicleSeat)(seatIndex - 1) : VehicleSeat.None;
 			}
 		}
@@ -653,7 +644,7 @@ namespace GTA
 		/// Sets a value indicating whether this <see cref="Ped"/> will stay in the vehicle when the driver gets jacked.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if <see cref="Ped"/> stays in vehicle when jacked; otherwise, <c>false</c>.
+		/// <see langword="true" /> if <see cref="Ped"/> stays in vehicle when jacked; otherwise, <see langword="false" />.
 		/// </value>
 		public bool StaysInVehicleWhenJacked
 		{
@@ -709,6 +700,15 @@ namespace GTA
 
 		public bool IsFleeing => Function.Call<bool>(Hash.IS_PED_FLEEING, Handle);
 
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Ped"/> is injured (<see cref="Entity.Health"/> of the <see cref="Ped"/> is lower than <see cref="InjuryHealthThreshold"/>) or does not exist.
+		/// Can be called safely to check if <see cref="Ped"/>s exist and are not injured without calling <see cref="Exists"/>.
+		/// </summary>
+		/// <value>
+		///   <see langword="true" /> this <see cref="Ped"/> is injured or does not exist; otherwise, <see langword="false" />.
+		/// </value>
+		/// <seealso cref="Entity.IsDead"/>
+		/// <seealso cref="Exists"/>
 		public bool IsInjured => Function.Call<bool>(Hash.IS_PED_INJURED, Handle);
 
 		public bool IsInStealthMode => Function.Call<bool>(Hash.GET_PED_STEALTH_MOVEMENT, Handle);
@@ -755,7 +755,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Ped"/> was killed by a stealth attack.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Ped"/> was killed by stealth; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Ped"/> was killed by stealth; otherwise, <see langword="false" />.
 		/// </value>
 		public bool WasKilledByStealth => Function.Call<bool>(Hash.WAS_PED_KILLED_BY_STEALTH, Handle);
 
@@ -763,7 +763,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Ped"/> was killed by a takedown.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Ped"/> was killed by a takedown; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Ped"/> was killed by a takedown; otherwise, <see langword="false" />.
 		/// </value>
 		public bool WasKilledByTakedown => Function.Call<bool>(Hash.WAS_PED_KILLED_BY_TAKEDOWN, Handle);
 
@@ -798,24 +798,19 @@ namespace GTA
 		///  If this <see cref="Ped"/> can't suffer critical damage, they will take base damage of weapons when bullets hit their head bone or its child bones, just like when bullets hit a bone other than their head bone, its child bones, or limb bones.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Ped"/> can suffer critical damage; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Ped"/> can suffer critical damage; otherwise, <see langword="false" />.
 		/// </value>
 		public bool CanSufferCriticalHits
 		{
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.PedSuffersCriticalHitOffset == 0)
 				{
 					return false;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x13BC : 0x13AC;
-				offset = (Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x13E4 : offset);
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x13F4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x1414 : offset;
-
-				return (SHVDN.NativeMemory.ReadByte(address + offset) & (1 << 2)) == 0;
+				return !SHVDN.NativeMemory.IsBitSet(address + SHVDN.NativeMemory.PedSuffersCriticalHitOffset, 2);
 			}
 			set => Function.Call(Hash.SET_PED_SUFFERS_CRITICAL_HITS, Handle, value);
 		}
@@ -845,23 +840,19 @@ namespace GTA
 		///  Note that <see cref="Ped"/>s will drop only their equipped weapon when they get killed.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if <see cref="Ped"/> drops the equipped weapon when killed; otherwise, <c>false</c>.
+		/// <see langword="true" /> if <see cref="Ped"/> drops the equipped weapon when killed; otherwise, <see langword="false" />.
 		/// </value>
 		public bool DropsEquippedWeaponOnDeath
 		{
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.PedDropsWeaponsWhenDeadOffset == 0)
 				{
 					return false;
 				}
 
-				int offset = (Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x13E5 : 0x13BD);
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x13F5 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x1415 : offset;
-
-				return (SHVDN.NativeMemory.ReadByte(address + offset) & (1 << 6)) == 0;
+				return !SHVDN.NativeMemory.IsBitSet(address + SHVDN.NativeMemory.PedDropsWeaponsWhenDeadOffset, 14);
 			}
 			set => Function.Call(Hash.SET_PED_DROPS_WEAPONS_WHEN_DEAD, Handle, value);
 		}
@@ -907,34 +898,22 @@ namespace GTA
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.InjuryHealthThresholdOffset == 0)
 				{
 					return 0.0f;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1480 : 0x1470;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x14C8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x14D8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x14E0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x1508 : offset;
-
-				return SHVDN.NativeMemory.ReadFloat(address + offset);
+				return SHVDN.NativeMemory.ReadFloat(address + SHVDN.NativeMemory.InjuryHealthThresholdOffset);
 			}
 			set
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.InjuryHealthThresholdOffset == 0)
 				{
 					return;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1480 : 0x1470;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x14C8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x14D8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x14E0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x1508 : offset;
-
-				SHVDN.NativeMemory.WriteFloat(address + offset, value);
+				SHVDN.NativeMemory.WriteFloat(address + SHVDN.NativeMemory.InjuryHealthThresholdOffset, value);
 			}
 		}
 
@@ -953,34 +932,22 @@ namespace GTA
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.FatalInjuryHealthThresholdOffset == 0)
 				{
 					return 0.0f;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1484 : 0x1474;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x14CC : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x14DC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x14E4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x150C : offset;
-
-				return SHVDN.NativeMemory.ReadFloat(address + offset);
+				return SHVDN.NativeMemory.ReadFloat(address + SHVDN.NativeMemory.FatalInjuryHealthThresholdOffset);
 			}
 			set
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.FatalInjuryHealthThresholdOffset == 0)
 				{
 					return;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1484 : 0x1474;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x14CC : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x14DC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x14E4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x150C : offset;
-
-				SHVDN.NativeMemory.WriteFloat(address + offset, value);
+				SHVDN.NativeMemory.WriteFloat(address + SHVDN.NativeMemory.FatalInjuryHealthThresholdOffset, value);
 			}
 		}
 
@@ -1068,7 +1035,7 @@ namespace GTA
 				throw new ArgumentOutOfRangeException(nameof(modifier));
 			}
 
-			Function.Call(Hash._PLAY_AMBIENT_SPEECH1, Handle, speechName, _speechModifierNames[(int)modifier]);
+			Function.Call(Hash.PLAY_PED_AMBIENT_SPEECH_NATIVE, Handle, speechName, _speechModifierNames[(int)modifier]);
 		}
 		public void PlayAmbientSpeech(string speechName, string voiceName, SpeechModifier modifier = SpeechModifier.Standard)
 		{
@@ -1077,7 +1044,7 @@ namespace GTA
 				throw new ArgumentOutOfRangeException(nameof(modifier));
 			}
 
-			Function.Call(Hash._PLAY_AMBIENT_SPEECH_WITH_VOICE, Handle, speechName, voiceName, _speechModifierNames[(int)modifier], 0);
+			Function.Call(Hash.PLAY_PED_AMBIENT_SPEECH_WITH_VOICE_NATIVE, Handle, speechName, voiceName, _speechModifierNames[(int)modifier], 0);
 		}
 
 		/// <summary>
@@ -1089,7 +1056,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Sets the animation dictionary or set this <see cref="Ped"/> should use or <c>null</c> to clear it.
+		/// Sets the animation dictionary or set this <see cref="Ped"/> should use or <see langword="null" /> to clear it.
 		/// </summary>
 		public string MovementAnimationSet
 		{
@@ -1129,6 +1096,17 @@ namespace GTA
 		public static PedHash[] GetAllModels()
 		{
 			return SHVDN.NativeMemory.PedModels.Select(x => (PedHash)x).ToArray();
+		}
+		/// <summary>
+		/// Gets an <c>array</c> of all loaded <see cref="PedHash"/>s that is appropriate to spawn as ambient vehicles.
+		/// The result array can contains animal hashes, which CREATE_RANDOM_PED excludes to spawn.
+		/// All the model hashes of the elements are loaded and the <see cref="Ped"/>s with the model hashes can be spawned immediately.
+		/// </summary>
+		public static PedHash[] GetAllLoadedModelsAppropriateForAmbientPeds()
+		{
+			return SHVDN.NativeMemory.GetLoadedAppropriatePedHashes()
+				.Select(x => (PedHash)x)
+				.ToArray();
 		}
 	}
 }

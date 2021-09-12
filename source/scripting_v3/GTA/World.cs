@@ -35,17 +35,30 @@ namespace GTA
 		};
 
 		static readonly GregorianCalendar calendar = new GregorianCalendar();
+
+		// removes gang and animal ped models just like CREATE_RANDOM_PED does
+		static readonly Func<Model, bool> defaultPredicateForCreateRandomPed = (x => x.IsHumanPed && !x.IsGangPed);
 		#endregion
 
 		#region Time & Day
 
 		/// <summary>
+		/// Gets or sets a value indicating whether the in-game clock is paused.
+		/// </summary>
+		public static bool IsClockPaused
+		{
+			get => SHVDN.NativeMemory.IsClockPaused;
+			set => Function.Call(Hash.PAUSE_CLOCK, value);
+		}
+
+		/// <summary>
 		/// Pauses or resumes the in-game clock.
 		/// </summary>
-		/// <param name="value">Pauses the game clock if set to <c>true</c>; otherwise, resumes the game clock.</param>
+		/// <param name="value">Pauses the game clock if set to <see langword="true" />; otherwise, resumes the game clock.</param>
+		[Obsolete("The World.PauseClock is obsolete, use World.IsClockPaused instead.")]
 		public static void PauseClock(bool value)
 		{
-			Function.Call(Hash.PAUSE_CLOCK, value);
+			IsClockPaused = value;
 		}
 
 		/// <summary>
@@ -93,6 +106,18 @@ namespace GTA
 			set => Function.Call(Hash.SET_CLOCK_TIME, value.Hours, value.Minutes, value.Seconds);
 		}
 
+		/// <summary>
+		/// Gets or sets how many milliseconds in the real world one game minute takes.
+		/// </summary>
+		/// <value>
+		/// The milliseconds one game minute takes in the real world.
+		/// </value>
+		public static int MillisecondsPerGameMinute
+		{
+			get => Function.Call<int>(Hash.GET_MILLISECONDS_PER_GAME_MINUTE);
+			set => SHVDN.NativeMemory.MillisecondsPerGameMinute = value;
+		}
+
 		#endregion
 
 		#region Weather & Effects
@@ -101,7 +126,7 @@ namespace GTA
 		/// Sets a value indicating whether lights in the <see cref="World"/> should be rendered.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if blackout; otherwise, <c>false</c>.
+		///   <see langword="true" /> if blackout; otherwise, <see langword="false" />.
 		/// </value>
 		public static bool Blackout
 		{
@@ -218,23 +243,17 @@ namespace GTA
 		/// </summary>
 		/// <returns>The <see cref="Vector3"/> coordinates of the Waypoint <see cref="Blip"/></returns>
 		/// <remarks>
-		/// Returns <c>null</c> if a waypoint <see cref="Blip"/> hasn't been set
+		/// Returns <see langword="null" /> if a waypoint <see cref="Blip"/> hasn't been set
 		/// </remarks>
 		public static Blip WaypointBlip
 		{
 			get
 			{
-				if (!Game.IsWaypointActive)
-				{
-					return null;
-				}
+				var handle = SHVDN.NativeMemory.GetWaypointBlip();
 
-				for (int it = Function.Call<int>(Hash._GET_BLIP_INFO_ID_ITERATOR), blip = Function.Call<int>(Hash.GET_FIRST_BLIP_INFO_ID, it); Function.Call<bool>(Hash.DOES_BLIP_EXIST, blip); blip = Function.Call<int>(Hash.GET_NEXT_BLIP_INFO_ID, it))
+				if (handle != 0)
 				{
-					if (Function.Call<int>(Hash.GET_BLIP_INFO_ID_TYPE, blip) == 4)
-					{
-						return new Blip(blip);
-					}
+					return new Blip(handle);
 				}
 
 				return null;
@@ -339,6 +358,11 @@ namespace GTA
 		public static int PickupObjectCount => SHVDN.NativeMemory.GetPickupObjectCount();
 
 		/// <summary>
+		/// A fast way to get the total number of <see cref="Projectile"/>s spawned in the world.
+		/// </summary>
+		public static int ProjectileCount => SHVDN.NativeMemory.GetProjectileCount();
+
+		/// <summary>
 		/// The total number of <see cref="Vehicle"/>s that can exist in the world.
 		/// </summary>
 		/// <remarks>The game will crash when the number of <see cref="Vehicle"/> is the same as this limit and the game tries to create a <see cref="Vehicle"/>.</remarks>
@@ -357,6 +381,11 @@ namespace GTA
 		/// The total number of <see cref="Prop"/>s in the world associated with a <see cref="Pickup"/> that can exist in the world.
 		/// </summary>
 		public static int PickupObjectCapacity => SHVDN.NativeMemory.GetPickupObjectCapacity();
+		/// <summary>
+		/// The total number of <see cref="Projectile"/>s that can exist in the world.
+		/// Always returns 50 currently since the limit is hard-coded in the exe.
+		/// </summary>
+		public static int ProjectileCapacity => SHVDN.NativeMemory.GetProjectileCapacity();
 
 		/// <summary>
 		/// Gets the closest <see cref="Ped"/> to a given position in the World.
@@ -364,7 +393,7 @@ namespace GTA
 		/// <param name="position">The position to find the nearest <see cref="Ped"/>.</param>
 		/// <param name="radius">The maximum distance from the <paramref name="position"/> to detect <see cref="Ped"/>s.</param>
 		/// <param name="models">The <see cref="Model"/> of <see cref="Ped"/>s to get, leave blank for all <see cref="Ped"/> <see cref="Model"/>s.</param>
-		/// <remarks>Returns <c>null</c> if no <see cref="Ped"/> was in the given region.</remarks>
+		/// <remarks>Returns <see langword="null" /> if no <see cref="Ped"/> was in the given region.</remarks>
 		public static Ped GetClosestPed(Vector3 position, float radius, params Model[] models)
 		{
 			return GetClosest(position, GetNearbyPeds(position, radius, models));
@@ -423,7 +452,7 @@ namespace GTA
 		/// <param name="position">The position to find the nearest <see cref="Vehicle"/>.</param>
 		/// <param name="radius">The maximum distance from the <paramref name="position"/> to detect <see cref="Vehicle"/>s.</param>
 		/// <param name="models">The <see cref="Model"/> of <see cref="Vehicle"/>s to get, leave blank for all <see cref="Vehicle"/> <see cref="Model"/>s.</param>
-		/// <remarks>Returns <c>null</c> if no <see cref="Vehicle"/> was in the given region.</remarks>
+		/// <remarks>Returns <see langword="null" /> if no <see cref="Vehicle"/> was in the given region.</remarks>
 		public static Vehicle GetClosestVehicle(Vector3 position, float radius, params Model[] models)
 		{
 			return GetClosest(position, GetNearbyVehicles(position, radius, models));
@@ -483,7 +512,7 @@ namespace GTA
 		/// <param name="position">The position to find the nearest <see cref="Prop"/>.</param>
 		/// <param name="radius">The maximum distance from the <paramref name="position"/> to detect <see cref="Prop"/>s.</param>
 		/// <param name="models">The <see cref="Model"/> of <see cref="Prop"/>s to get, leave blank for all <see cref="Prop"/> <see cref="Model"/>s.</param>
-		/// <remarks>Returns <c>null</c> if no <see cref="Prop"/> was in the given region.</remarks>
+		/// <remarks>Returns <see langword="null" /> if no <see cref="Prop"/> was in the given region.</remarks>
 		public static Prop GetClosestProp(Vector3 position, float radius, params Model[] models)
 		{
 			return GetClosest(position, GetNearbyProps(position, radius, models));
@@ -515,7 +544,7 @@ namespace GTA
 		/// </summary>
 		/// <param name="position">The position to find the nearest <see cref="Prop"/>.</param>
 		/// <param name="radius">The maximum distance from the <paramref name="position"/> to detect <see cref="Prop"/>s.</param>
-		/// <remarks>Returns <c>null</c> if no <see cref="Prop"/> was in the given region.</remarks>
+		/// <remarks>Returns <see langword="null" /> if no <see cref="Prop"/> was in the given region.</remarks>
 		public static Prop GetClosestPickupObject(Vector3 position, float radius)
 		{
 			return GetClosest(position, GetNearbyPickupObjects(position, radius));
@@ -536,6 +565,32 @@ namespace GTA
 		public static Prop[] GetNearbyPickupObjects(Vector3 position, float radius)
 		{
 			return Array.ConvertAll(SHVDN.NativeMemory.GetPickupObjectHandles(position.ToArray(), radius), handle => new Prop(handle));
+		}
+		/// <summary>
+		/// Gets the closest <see cref="Projectile"/> to a given position in the World.
+		/// </summary>
+		/// <param name="position">The position to find the nearest <see cref="Projectile"/>.</param>
+		/// <param name="radius">The maximum distance from the <paramref name="position"/> to detect <see cref="Projectile"/>s.</param>
+		/// <remarks>Returns <see langword="null" /> if no <see cref="Projectile"/> was in the given region.</remarks>
+		public static Projectile GetClosestProjectile(Vector3 position, float radius)
+		{
+			return GetClosest(position, GetNearbyProjectiles(position, radius));
+		}
+		/// <summary>
+		/// Gets an <c>array</c> of all <see cref="Projectile"/>s in the World.
+		/// </summary>
+		public static Projectile[] GetAllProjectiles()
+		{
+			return Array.ConvertAll(SHVDN.NativeMemory.GetProjectileHandles(), handle => new Projectile(handle));
+		}
+		/// <summary>
+		/// Gets an <c>array</c> of all <see cref="Projectile"/>s in a given region in the World.
+		/// </summary>
+		/// <param name="position">The position to check the <see cref="Projectile"/> against.</param>
+		/// <param name="radius">The maximum distance from the <paramref name="position"/> to detect <see cref="Projectile"/>s.</param>
+		public static Projectile[] GetNearbyProjectiles(Vector3 position, float radius)
+		{
+			return Array.ConvertAll(SHVDN.NativeMemory.GetProjectileHandles(position.ToArray(), radius), handle => new Projectile(handle));
 		}
 
 		/// <summary>
@@ -609,7 +664,7 @@ namespace GTA
 		/// <param name="model">The <see cref="Model"/> of the <see cref="Ped"/>.</param>
 		/// <param name="position">The position to spawn the <see cref="Ped"/> at.</param>
 		/// <param name="heading">The heading of the <see cref="Ped"/>.</param>
-		/// <remarks>returns <c>null</c> if the <see cref="Ped"/> could not be spawned</remarks>
+		/// <remarks>returns <see langword="null" /> if the <see cref="Ped"/> could not be spawned.</remarks>
 		public static Ped CreatePed(Model model, Vector3 position, float heading = 0f)
 		{
 			if (PedCount >= PedCapacity || !model.IsPed || !model.Request(1000))
@@ -632,6 +687,42 @@ namespace GTA
 
 			return new Ped(Function.Call<int>(Hash.CREATE_RANDOM_PED, position.X, position.Y, position.Z));
 		}
+		/// <summary>
+		/// Spawns a <see cref="Ped"/> of a random <see cref="Model"/> at the position specified.
+		/// </summary>
+		/// <param name="position">The position to spawn the <see cref="Ped"/> at.</param>
+		/// <param name="heading">The heading of the <see cref="Ped"/>.</param>
+		/// <param name="predicate">
+		/// The method that determines whether a model should be considered when choosing a random model for the <see cref="Ped"/>.
+		/// If <see langword="null" /> is set, gangster and animal models will not be chosen, just like CREATE_PED does.
+		/// </param>
+		public static Ped CreateRandomPed(Vector3 position, float heading, Func<Model, bool> predicate = null)
+		{
+			if (PedCount >= PedCapacity)
+			{
+				return null;
+			}
+
+			var loadedAppropriatePedModels = SHVDN.NativeMemory.GetLoadedAppropriatePedHashes().Select(x => new Model(x));
+			var filteredPedModels = predicate != null
+				? loadedAppropriatePedModels.Where(predicate).ToArray()
+				: loadedAppropriatePedModels.Where(defaultPredicateForCreateRandomPed).ToArray();
+			var filteredModelCount = filteredPedModels.Length;
+			if (filteredModelCount == 0)
+				return null;
+
+			var rand = Math.Random.Instance;
+			var pickedModel = filteredPedModels.ElementAt(rand.Next(filteredModelCount));
+
+			// the model should be loaded at this moment, so call CREATE_PED immediately
+			var createdPed = new Ped(Function.Call<int>(Hash.CREATE_PED, 26, pickedModel, position.X, position.Y, position.Z, heading, false, false));
+
+			// Randomize clothes and ped props just like CREATE_RANDOM_PED does
+			Function.Call(Hash.SET_PED_RANDOM_COMPONENT_VARIATION, createdPed.Handle, 0);
+			Function.Call(Hash.SET_PED_RANDOM_PROPS, createdPed.Handle);
+
+			return createdPed;
+		}
 
 		/// <summary>
 		/// Spawns a <see cref="Vehicle"/> of the given <see cref="Model"/> at the position and heading specified.
@@ -639,7 +730,7 @@ namespace GTA
 		/// <param name="model">The <see cref="Model"/> of the <see cref="Vehicle"/>.</param>
 		/// <param name="position">The position to spawn the <see cref="Vehicle"/> at.</param>
 		/// <param name="heading">The heading of the <see cref="Vehicle"/>.</param>
-		/// <remarks>returns <c>null</c> if the <see cref="Vehicle"/> could not be spawned</remarks>
+		/// <remarks>returns <see langword="null" /> if the <see cref="Vehicle"/> could not be spawned.</remarks>
 		public static Vehicle CreateVehicle(Model model, Vector3 position, float heading = 0f)
 		{
 			if (VehicleCount >= VehicleCapacity || !model.IsVehicle || !model.Request(1000))
@@ -650,29 +741,30 @@ namespace GTA
 			return new Vehicle(Function.Call<int>(Hash.CREATE_VEHICLE, model.Hash, position.X, position.Y, position.Z, heading, false, false));
 		}
 		/// <summary>
-		/// Spawns a <see cref="Vehicle"/> of a random <see cref="Model"/> at the position specified. Does not work currently.
+		/// Spawns a <see cref="Vehicle"/> of a random <see cref="Model"/> at the position specified.
 		/// </summary>
 		/// <param name="position">The position to spawn the <see cref="Vehicle"/> at.</param>
 		/// <param name="heading">The heading of the <see cref="Vehicle"/>.</param>
-		/// <remarks>returns <c>null</c> if the <see cref="Vehicle"/> could not be spawned</remarks>
-		public static Vehicle CreateRandomVehicle(Vector3 position, float heading = 0f)
+		/// <param name="predicate">The method that determines whether a model should be considered when choosing a random model for the <see cref="Vehicle"/>.</param>
+		/// <remarks>returns <see langword="null" /> if the <see cref="Vehicle"/> could not be spawned.</remarks>
+		public static Vehicle CreateRandomVehicle(Vector3 position, float heading = 0f, Func<Model, bool> predicate = null)
 		{
-			// GET_RANDOM_VEHICLE_MODEL_IN_MEMORY is not present but just a nullsub in the retail version
-			// We need certain memory patterns to get this method to spawn random ambient vehicles properly
-			return null;
+			if (VehicleCount >= VehicleCapacity)
+			{
+				return null;
+			}
 
-			int outModel, outInt;
-			unsafe
-			{
-				Function.Call(Hash.GET_RANDOM_VEHICLE_MODEL_IN_MEMORY, 1, &outModel, &outInt);
-			}
-			Model model = outModel;
-			if (model.IsVehicle && model.IsLoaded)
-			{
-				return
-					new Vehicle(Function.Call<int>(Hash.CREATE_VEHICLE, model.Hash, position.X, position.Y, position.Z, heading, false, false));
-			}
-			return null;
+			var loadedAppropriateVehModels = SHVDN.NativeMemory.GetLoadedAppropriateVehicleHashes().Select(x => new Model(x));
+			var filteredVehModels = predicate != null ? loadedAppropriateVehModels.Where(predicate).ToArray() : loadedAppropriateVehModels.ToArray();
+			var filteredModelCount = filteredVehModels.Length;
+			if (filteredModelCount == 0)
+				return null;
+
+			var rand = Math.Random.Instance;
+			var pickedModel = filteredVehModels.ElementAt(rand.Next(filteredModelCount));
+
+			// the model should be loaded at this moment, so call CREATE_VEHICLE immediately
+			return new Vehicle(Function.Call<int>(Hash.CREATE_VEHICLE, pickedModel, position.X, position.Y, position.Z, heading, false, false));
 		}
 
 		/// <summary>
@@ -680,9 +772,9 @@ namespace GTA
 		/// </summary>
 		/// <param name="model">The <see cref="Model"/> of the <see cref="Prop"/>.</param>
 		/// <param name="position">The position to spawn the <see cref="Prop"/> at.</param>
-		/// <param name="dynamic">if set to <c>true</c> the <see cref="Prop"/> will have physics; otherwise, it will be static.</param>
-		/// <param name="placeOnGround">if set to <c>true</c> place the prop on the ground nearest to the <paramref name="position"/>.</param>
-		/// <remarks>returns <c>null</c> if the <see cref="Prop"/> could not be spawned</remarks>
+		/// <param name="dynamic">if set to <see langword="true" /> the <see cref="Prop"/> will have physics; otherwise, it will be static.</param>
+		/// <param name="placeOnGround">if set to <see langword="true" /> place the prop on the ground nearest to the <paramref name="position"/>.</param>
+		/// <remarks>returns <see langword="null" /> if the <see cref="Prop"/> could not be spawned.</remarks>
 		public static Prop CreateProp(Model model, Vector3 position, bool dynamic, bool placeOnGround)
 		{
 			if (PropCount >= PropCapacity || !model.Request(1000))
@@ -703,9 +795,9 @@ namespace GTA
 		/// <param name="model">The <see cref="Model"/> of the <see cref="Prop"/>.</param>
 		/// <param name="position">The position to spawn the <see cref="Prop"/> at.</param>
 		/// <param name="rotation">The rotation of the <see cref="Prop"/>.</param>
-		/// <param name="dynamic">if set to <c>true</c> the <see cref="Prop"/> will have physics; otherwise, it will be static.</param>
-		/// <param name="placeOnGround">if set to <c>true</c> place the prop on the ground nearest to the <paramref name="position"/>.</param>
-		/// <remarks>returns <c>null</c> if the <see cref="Prop"/> could not be spawned</remarks>
+		/// <param name="dynamic">if set to <see langword="true" /> the <see cref="Prop"/> will have physics; otherwise, it will be static.</param>
+		/// <param name="placeOnGround">if set to <see langword="true" /> place the prop on the ground nearest to the <paramref name="position"/>.</param>
+		/// <remarks>returns <see langword="null" /> if the <see cref="Prop"/> could not be spawned.</remarks>
 		public static Prop CreateProp(Model model, Vector3 position, Vector3 rotation, bool dynamic, bool placeOnGround)
 		{
 			Prop prop = CreateProp(model, position, dynamic, placeOnGround);
@@ -722,8 +814,8 @@ namespace GTA
 		/// </summary>
 		/// <param name="model">The <see cref="Model"/> of the <see cref="Prop"/>.</param>
 		/// <param name="position">The position to spawn the <see cref="Prop"/> at.</param>
-		/// <param name="dynamic">if set to <c>true</c> the <see cref="Prop"/> will have physics; otherwise, it will be static.</param>
-		/// <remarks>returns <c>null</c> if the <see cref="Prop"/> could not be spawned</remarks>
+		/// <param name="dynamic">if set to <see langword="true" /> the <see cref="Prop"/> will have physics; otherwise, it will be static.</param>
+		/// <remarks>returns <see langword="null" /> if the <see cref="Prop"/> could not be spawned.</remarks>
 		public static Prop CreatePropNoOffset(Model model, Vector3 position, bool dynamic)
 		{
 			if (PropCount >= PropCapacity || !model.Request(1000))
@@ -739,8 +831,8 @@ namespace GTA
 		/// <param name="model">The <see cref="Model"/> of the <see cref="Prop"/>.</param>
 		/// <param name="position">The position to spawn the <see cref="Prop"/> at.</param>
 		/// <param name="rotation">The rotation of the <see cref="Prop"/>.</param>
-		/// <param name="dynamic">if set to <c>true</c> the <see cref="Prop"/> will have physics; otherwise, it will be static.</param>
-		/// <remarks>returns <c>null</c> if the <see cref="Prop"/> could not be spawned</remarks>
+		/// <param name="dynamic">if set to <see langword="true" /> the <see cref="Prop"/> will have physics; otherwise, it will be static.</param>
+		/// <remarks>returns <see langword="null" /> if the <see cref="Prop"/> could not be spawned.</remarks>
 		public static Prop CreatePropNoOffset(Model model, Vector3 position, Vector3 rotation, bool dynamic)
 		{
 			Prop prop = CreatePropNoOffset(model, position, dynamic);
@@ -832,7 +924,7 @@ namespace GTA
 		/// <param name="pointTo">The position in the world where this <see cref="Checkpoint"/> should point.</param>
 		/// <param name="radius">The radius of the <see cref="Checkpoint"/>.</param>
 		/// <param name="color">The color of the <see cref="Checkpoint"/>.</param>
-		/// <remarks>returns <c>null</c> if the <see cref="Checkpoint"/> could not be created</remarks>
+		/// <remarks>returns <see langword="null" /> if the <see cref="Checkpoint"/> could not be created</remarks>
 		public static Checkpoint CreateCheckpoint(CheckpointIcon icon, Vector3 position, Vector3 pointTo, float radius, System.Drawing.Color color)
 		{
 			int handle = Function.Call<int>(Hash.CREATE_CHECKPOINT, icon, position.X, position.Y, position.Z, pointTo.X, pointTo.Y, pointTo.Z, radius, color.R, color.G, color.B, color.A, 0);
@@ -846,7 +938,7 @@ namespace GTA
 		/// <param name="pointTo">The position in the world where this <see cref="Checkpoint"/> should point.</param>
 		/// <param name="radius">The radius of the <see cref="Checkpoint"/>.</param>
 		/// <param name="color">The color of the <see cref="Checkpoint"/>.</param>
-		/// <remarks>returns <c>null</c> if the <see cref="Checkpoint"/> could not be created</remarks>
+		/// <remarks>returns <see langword="null" /> if the <see cref="Checkpoint"/> could not be created</remarks>
 		public static Checkpoint CreateCheckpoint(CheckpointCustomIcon icon, Vector3 position, Vector3 pointTo, float radius, System.Drawing.Color color)
 		{
 			int handle = Function.Call<int>(Hash.CREATE_CHECKPOINT, 42, position.X, position.Y, position.Z, pointTo.X, pointTo.Y, pointTo.Z, radius, color.R, color.G, color.B, color.A, icon);
@@ -883,7 +975,7 @@ namespace GTA
 		/// The rendering <see cref="Camera"/>.
 		/// </value>
 		/// <remarks>
-		/// Setting to <c>null</c> sets the rendering <see cref="Camera"/> to <see cref="GameplayCamera"/>.
+		/// Setting to <see langword="null" /> sets the rendering <see cref="Camera"/> to <see cref="GameplayCamera"/>.
 		/// </remarks>
 		public static Camera RenderingCamera
 		{
@@ -918,7 +1010,7 @@ namespace GTA
 		/// <param name="rot">What rotation to apply to the effect.</param>
 		/// <param name="scale">How much to scale the size of the effect by.</param>
 		/// <param name="invertAxis">Which axis to flip the effect in.</param>
-		/// <returns><c>true</c>If the effect was able to start; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" />If the effect was able to start; otherwise, <see langword="false" />.</returns>
 		public static bool CreateParticleEffectNonLooped(ParticleEffectAsset asset, string effectName, Vector3 pos, Vector3 rot = default, float scale = 1.0f, InvertAxisFlags invertAxis = InvertAxisFlags.None)
 		{
 			if (!asset.UseNext())
@@ -938,7 +1030,7 @@ namespace GTA
 		/// <param name="rot">The rotation, relative to the <paramref name="entity"/>, the effect has.</param>
 		/// <param name="scale">How much to scale the size of the effect by.</param>
 		/// <param name="invertAxis">Which axis to flip the effect in. For a car side exahust you may need to flip in the Y Axis</param>
-		/// <returns><c>true</c>If the effect was able to start; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" />If the effect was able to start; otherwise, <see langword="false" />.</returns>
 		public static bool CreateParticleEffectNonLooped(ParticleEffectAsset asset, string effectName, Entity entity, Vector3 off = default, Vector3 rot = default, float scale = 1.0f, InvertAxisFlags invertAxis = InvertAxisFlags.None)
 		{
 			if (!asset.UseNext())
@@ -958,7 +1050,7 @@ namespace GTA
 		/// <param name="rot">The rotation, relative to the <paramref name="entityBone"/>, the effect has.</param>
 		/// <param name="scale">How much to scale the size of the effect by.</param>
 		/// <param name="invertAxis">Which axis to flip the effect in. For a car side exahust you may need to flip in the Y Axis</param>
-		/// <returns><c>true</c>If the effect was able to start; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" />If the effect was able to start; otherwise, <see langword="false" />.</returns>
 		public static bool CreateParticleEffectNonLooped(ParticleEffectAsset asset, string effectName, EntityBone entityBone, Vector3 off = default, Vector3 rot = default, float scale = 1.0f, InvertAxisFlags invertAxis = InvertAxisFlags.None)
 		{
 			if (!asset.UseNext())
@@ -1056,7 +1148,7 @@ namespace GTA
 		/// <param name="rotation">The rotation of the <see cref="Rope"/>.</param>
 		/// <param name="length">The length of the <see cref="Rope"/>.</param>
 		/// <param name="minLength">The minimum length of the <see cref="Rope"/>.</param>
-		/// <param name="breakable">if set to <c>true</c> the <see cref="Rope"/> will break if shot.</param>
+		/// <param name="breakable">if set to <see langword="true" /> the <see cref="Rope"/> will break if shot.</param>
 		public static Rope AddRope(RopeType type, Vector3 position, Vector3 rotation, float length, float minLength, bool breakable)
 		{
 			Function.Call(Hash.ROPE_LOAD_TEXTURES);
@@ -1069,7 +1161,7 @@ namespace GTA
 		/// </summary>
 		/// <param name="sourcePosition">Where the bullet is fired from.</param>
 		/// <param name="targetPosition">Where the bullet is fired to.</param>
-		/// <param name="owner">The <see cref="Ped"/> who fired the bullet, leave <c>null</c> for no one.</param>
+		/// <param name="owner">The <see cref="Ped"/> who fired the bullet, leave <see langword="null" /> for no one.</param>
 		/// <param name="weaponAsset">The weapon that the bullet is fired from.</param>
 		/// <param name="damage">The damage the bullet will cause.</param>
 		/// <param name="speed">The speed, only affects projectile weapons, leave -1 for default.</param>
@@ -1086,8 +1178,8 @@ namespace GTA
 		/// <param name="radius">The radius of the explosion.</param>
 		/// <param name="cameraShake">The amount of camera shake to apply to nearby cameras.</param>
 		/// <param name="owner">The <see cref="Ped"/> who caused the explosion, leave null if no one caused the explosion.</param>
-		/// <param name="aubidble">if set to <c>true</c> explosion can be heard.</param>
-		/// <param name="invisible">if set to <c>true</c> explosion is invisible.</param>
+		/// <param name="aubidble">if set to <see langword="true" /> explosion can be heard.</param>
+		/// <param name="invisible">if set to <see langword="true" /> explosion is invisible.</param>
 		public static void AddExplosion(Vector3 position, ExplosionType type, float radius, float cameraShake, Ped owner = null, bool aubidble = true, bool invisible = false)
 		{
 			if (owner?.Exists() == true)
@@ -1128,12 +1220,12 @@ namespace GTA
 		/// <param name="rot">The rotation of the marker.</param>
 		/// <param name="scale">The amount to scale the marker by.</param>
 		/// <param name="color">The color of the marker.</param>
-		/// <param name="bobUpAndDown">if set to <c>true</c> the marker will bob up and down.</param>
-		/// <param name="faceCamera">if set to <c>true</c> the marker will always face the camera, regardless of its rotation.</param>
-		/// <param name="rotateY">if set to <c>true</c> rotates only on the y axis(heading).</param>
+		/// <param name="bobUpAndDown">if set to <see langword="true" /> the marker will bob up and down.</param>
+		/// <param name="faceCamera">if set to <see langword="true" /> the marker will always face the camera, regardless of its rotation.</param>
+		/// <param name="rotateY">if set to <see langword="true" /> rotates only on the y axis(heading).</param>
 		/// <param name="textueDict">Name of texture dictionary to load the texture from, leave null for no texture in the marker.</param>
 		/// <param name="textureName">Name of texture inside the dictionary to load the texture from, leave null for no texture in the marker.</param>
-		/// <param name="drawOnEntity">if set to <c>true</c> draw on any <see cref="Entity"/> that intersects the marker.</param>
+		/// <param name="drawOnEntity">if set to <see langword="true" /> draw on any <see cref="Entity"/> that intersects the marker.</param>
 		public static void DrawMarker(MarkerType type, Vector3 pos, Vector3 dir, Vector3 rot, Vector3 scale, Color color, bool bobUpAndDown = false, bool faceCamera = false, bool rotateY = false, string textueDict = null, string textureName = null, bool drawOnEntity = false)
 		{
 			if (!string.IsNullOrEmpty(textueDict) && !string.IsNullOrEmpty(textureName))
@@ -1195,7 +1287,7 @@ namespace GTA
 		/// <param name="ignoreEntity">Specify an <see cref="Entity"/> that the raycast should ignore, leave null for no entities ignored.</param>
 		public static RaycastResult Raycast(Vector3 source, Vector3 target, IntersectFlags options, Entity ignoreEntity = null)
 		{
-			return new RaycastResult(Function.Call<int>(Hash._START_SHAPE_TEST_RAY, source.X, source.Y, source.Z, target.X, target.Y, target.Z, options, ignoreEntity == null ? 0 : ignoreEntity.Handle, 7));
+			return new RaycastResult(Function.Call<int>(Hash.START_EXPENSIVE_SYNCHRONOUS_SHAPE_TEST_LOS_PROBE, source.X, source.Y, source.Z, target.X, target.Y, target.Z, options, ignoreEntity == null ? 0 : ignoreEntity.Handle, 7));
 		}
 		/// <summary>
 		/// Creates a raycast between 2 points.
@@ -1209,7 +1301,7 @@ namespace GTA
 		{
 			Vector3 target = source + direction * maxDistance;
 
-			return new RaycastResult(Function.Call<int>(Hash._START_SHAPE_TEST_RAY, source.X, source.Y, source.Z, target.X, target.Y, target.Z, options, ignoreEntity == null ? 0 : ignoreEntity.Handle, 7));
+			return new RaycastResult(Function.Call<int>(Hash.START_EXPENSIVE_SYNCHRONOUS_SHAPE_TEST_LOS_PROBE, source.X, source.Y, source.Z, target.X, target.Y, target.Z, options, ignoreEntity == null ? 0 : ignoreEntity.Handle, 7));
 		}
 
 		/// <summary>
@@ -1314,7 +1406,7 @@ namespace GTA
 		/// Gets the nearest safe coordinate to position a <see cref="Ped"/>.
 		/// </summary>
 		/// <param name="position">The position to check around.</param>
-		/// <param name="sidewalk">if set to <c>true</c> Only find positions on the sidewalk.</param>
+		/// <param name="sidewalk">if set to <see langword="true" /> Only find positions on the sidewalk.</param>
 		/// <param name="flags">The flags.</param>
 		public static Vector3 GetSafeCoordForPed(Vector3 position, bool sidewalk = true, int flags = 0)
 		{
@@ -1333,7 +1425,7 @@ namespace GTA
 		/// Gets the next position on the street where a <see cref="Vehicle"/> can be placed.
 		/// </summary>
 		/// <param name="position">The position to check around.</param>
-		/// <param name="unoccupied">if set to <c>true</c> only find positions that dont already have a vehicle in them.</param>
+		/// <param name="unoccupied">if set to <see langword="true" /> only find positions that dont already have a vehicle in them.</param>
 		public static Vector3 GetNextPositionOnStreet(Vector2 position, bool unoccupied = false)
 		{
 			return GetNextPositionOnStreet(new Vector3(position.X, position.Y, 0f), unoccupied);
@@ -1342,7 +1434,7 @@ namespace GTA
 		/// Gets the next position on the street where a <see cref="Vehicle"/> can be placed.
 		/// </summary>
 		/// <param name="position">The position to check around.</param>
-		/// <param name="unoccupied">if set to <c>true</c> only find positions that dont already have a vehicle in them.</param>
+		/// <param name="unoccupied">if set to <see langword="true" /> only find positions that dont already have a vehicle in them.</param>
 		public static Vector3 GetNextPositionOnStreet(Vector3 position, bool unoccupied = false)
 		{
 			NativeVector3 outPos;

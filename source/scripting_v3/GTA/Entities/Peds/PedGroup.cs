@@ -128,7 +128,9 @@ namespace GTA
 
 		public List<Ped> ToList(bool includingLeader = true)
 		{
-			var result = new List<Ped>();
+			var memberCount = MemberCount;
+			var expectedListSize = includingLeader ? 1 + memberCount : memberCount;
+			var result = new List<Ped>(expectedListSize);
 
 			if (includingLeader)
 			{
@@ -140,7 +142,7 @@ namespace GTA
 				}
 			}
 
-			for (int i = 0; i < MemberCount; i++)
+			for (int i = 0; i < memberCount; i++)
 			{
 				Ped member = GetMember(i);
 
@@ -164,7 +166,7 @@ namespace GTA
 		/// <summary>
 		/// Determines if this <see cref="PedGroup"/> exists.
 		/// </summary>
-		/// <returns><c>true</c> if this <see cref="PedGroup"/> exists; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if this <see cref="PedGroup"/> exists; otherwise, <see langword="false" />.</returns>
 		public override bool Exists()
 		{
 			return Function.Call<bool>(Hash.DOES_GROUP_EXIST, Handle);
@@ -174,7 +176,7 @@ namespace GTA
 		/// Determines if an <see cref="object"/> refers to the same group as this <see cref="PedGroup"/>.
 		/// </summary>
 		/// <param name="obj">The <see cref="object"/> to check.</param>
-		/// <returns><c>true</c> if the <paramref name="obj"/> is the same group as this <see cref="PedGroup"/>; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if the <paramref name="obj"/> is the same group as this <see cref="PedGroup"/>; otherwise, <see langword="false" />.</returns>
 		public override bool Equals(object obj)
 		{
 			if (obj is PedGroup group)
@@ -190,7 +192,7 @@ namespace GTA
 		/// </summary>
 		/// <param name="left">The left <see cref="Checkpoint"/>.</param>
 		/// <param name="right">The right <see cref="Checkpoint"/>.</param>
-		/// <returns><c>true</c> if <paramref name="left"/> is the same group as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if <paramref name="left"/> is the same group as <paramref name="right"/>; otherwise, <see langword="false" />.</returns>
 		public static bool operator ==(PedGroup left, PedGroup right)
 		{
 			return left is null ? right is null : left.Equals(right);
@@ -200,7 +202,7 @@ namespace GTA
 		/// </summary>
 		/// <param name="left">The left <see cref="PedGroup"/>.</param>
 		/// <param name="right">The right <see cref="PedGroup"/>.</param>
-		/// <returns><c>true</c> if <paramref name="left"/> is not the same group as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if <paramref name="left"/> is not the same group as <paramref name="right"/>; otherwise, <see langword="false" />.</returns>
 		public static bool operator !=(PedGroup left, PedGroup right)
 		{
 			return !(left == right);

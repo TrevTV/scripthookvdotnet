@@ -14,6 +14,7 @@ namespace GTA
 	{
 		#region Fields
 		EntityBoneCollection _bones;
+		EntityDamageRecordCollection _damageRecords;
 		#endregion
 
 		internal Entity(int handle) : base(handle)
@@ -27,7 +28,7 @@ namespace GTA
 		/// <returns>Returns a <see cref="Ped"/> if this handle corresponds to a Ped.
 		/// Returns a <see cref="Vehicle"/> if this handle corresponds to a Vehicle.
 		/// Returns a <see cref="Prop"/> if this handle corresponds to a Prop.
-		/// Returns <c>null</c> if no <see cref="Entity"/> exists this the specified <paramref name="handle"/></returns>
+		/// Returns <see langword="null" /> if no <see cref="Entity"/> exists this the specified <paramref name="handle"/></returns>
 		public static Entity FromHandle(int handle)
 		{
 			switch ((EntityType)Function.Call<int>(Hash.GET_ENTITY_TYPE, handle))
@@ -53,17 +54,19 @@ namespace GTA
 		public EntityType EntityType => (EntityType)Function.Call<int>(Hash.GET_ENTITY_TYPE, Handle);
 
 		/// <summary>
-		/// Gets a value indicating whether this <see cref="Entity"/> is dead.
+		/// Gets a value indicating whether this <see cref="Entity"/> is dead or does not exist.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Entity"/> is dead; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> is dead or does not exist; otherwise, <see langword="false" />.
 		/// </value>
+		/// <seealso cref="Exists"/>
+		/// <seealso cref="Ped.IsInjured"/>
 		public bool IsDead => Function.Call<bool>(Hash.IS_ENTITY_DEAD, Handle);
 		/// <summary>
-		/// Gets a value indicating whether this <see cref="Entity"/> is alive.
+		/// Gets a value indicating whether this <see cref="Entity"/> exists and is alive.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Entity"/> is alive; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> exists and is alive; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsAlive => !IsDead;
 
@@ -111,7 +114,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is persistent.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is persistent; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is persistent; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsPersistent
 		{
@@ -133,7 +136,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is frozen.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is position frozen; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is position frozen; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsPositionFrozen
 		{
@@ -161,10 +164,10 @@ namespace GTA
 
 		/// <summary>
 		/// Gets or sets the health of this <see cref="Entity"/> as an <see cref="int"/>.
-		/// <para>Use <see cref="HealthFloat"/> instead if you need to get or set the value strictly, since a health value of a <see cref="Entity"/> are stored as a <see cref="float"/>.</para>
+		/// <para>Use <see cref="HealthFloat"/> instead if you need to get or set the value precisely, since a health value of a <see cref="Entity"/> are stored as a <see cref="float"/>.</para>
 		/// </summary>
 		/// <value>
-		/// The health as an integer.
+		/// The health as an <see cref="int"/>.
 		/// </value>
 		/// <seealso cref="HealthFloat"/>
 		public int Health
@@ -174,10 +177,10 @@ namespace GTA
 		}
 		/// <summary>
 		/// Gets or sets the maximum health of this <see cref="Entity"/> as an <see cref="int"/>.
-		/// <para>Use <see cref="MaxHealthFloat"/> instead if you need to get or set the value strictly, since a max health value of a <see cref="Entity"/> are stored as a <see cref="float"/>.</para>
+		/// <para>Use <see cref="MaxHealthFloat"/> instead if you need to get or set the value precisely, since a max health value of a <see cref="Entity"/> are stored as a <see cref="float"/>.</para>
 		/// </summary>
 		/// <value>
-		/// The maximum health as an integer.
+		/// The maximum health as a <see cref="int"/>.
 		/// </value>
 		public virtual int MaxHealth
 		{
@@ -189,7 +192,7 @@ namespace GTA
 		/// Gets or sets the health of this <see cref="Entity"/> as a <see cref="float"/>.
 		/// </summary>
 		/// <value>
-		/// The health in float.
+		/// The health as a <see cref="float"/>.
 		/// </value>
 		public float HealthFloat
 		{
@@ -215,10 +218,10 @@ namespace GTA
 			}
 		}
 		/// <summary>
-		/// Gets or sets the maximum health of this <see cref="Entity"/> in float.
+		/// Gets or sets the maximum health of this <see cref="Entity"/> as a <see cref="float"/>.
 		/// </summary>
 		/// <value>
-		/// The maximum health in float.
+		/// The maximum health as a <see cref="float"/>.
 		/// </value>
 		public float MaxHealthFloat
 		{
@@ -348,7 +351,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets the vector that points above this <see cref="Entity"/>
+		/// Gets the vector that points above this <see cref="Entity"/>.
 		/// </summary>
 		public Vector3 UpVector
 		{
@@ -365,7 +368,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets the vector that points to the right of this <see cref="Entity"/>
+		/// Gets the vector that points to the right of this <see cref="Entity"/>.
 		/// </summary>
 		public Vector3 RightVector
 		{
@@ -382,7 +385,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets the vector that points in front of this <see cref="Entity"/>
+		/// Gets the vector that points in front of this <see cref="Entity"/>.
 		/// </summary>
 		public Vector3 ForwardVector
 		{
@@ -399,7 +402,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets a position directly to the left of this <see cref="Entity"/>
+		/// Gets a position directly to the left of this <see cref="Entity"/>.
 		/// </summary>
 		public Vector3 LeftPosition
 		{
@@ -411,7 +414,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets a position directly to the right of this <see cref="Entity"/>
+		/// Gets a position directly to the right of this <see cref="Entity"/>.
 		/// </summary>
 		public Vector3 RightPosition
 		{
@@ -423,7 +426,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets a position directly behind this <see cref="Entity"/>
+		/// Gets a position directly behind this <see cref="Entity"/>.
 		/// </summary>
 		public Vector3 RearPosition
 		{
@@ -435,7 +438,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets a position directly in front of this <see cref="Entity"/>
+		/// Gets a position directly in front of this <see cref="Entity"/>.
 		/// </summary>
 		public Vector3 FrontPosition
 		{
@@ -447,7 +450,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets a position directly above this <see cref="Entity"/>
+		/// Gets a position directly above this <see cref="Entity"/>.
 		/// </summary>
 		public Vector3 AbovePosition
 		{
@@ -459,7 +462,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets a position directly below this <see cref="Entity"/>
+		/// Gets a position directly below this <see cref="Entity"/>.
 		/// </summary>
 		public Vector3 BelowPosition
 		{
@@ -471,7 +474,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets the position in world coordinates of an offset relative this <see cref="Entity"/>
+		/// Gets the position in world coordinates of an offset relative this <see cref="Entity"/>.
 		/// </summary>
 		/// <param name="offset">The offset from this <see cref="Entity"/>.</param>
 		public Vector3 GetOffsetPosition(Vector3 offset)
@@ -480,7 +483,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Gets the relative offset of this <see cref="Entity"/> from a world coordinates position
+		/// Gets the relative offset of this <see cref="Entity"/> from a world coordinates position.
 		/// </summary>
 		/// <param name="worldCoords">The world coordinates.</param>
 		public Vector3 GetPositionOffset(Vector3 worldCoords)
@@ -530,11 +533,16 @@ namespace GTA
 		#region Damaging
 
 		/// <summary>
+		/// Gets a collection of the <see cref="EntityDamageRecord"/>s in this <see cref="Entity"/>.
+		/// </summary>
+		public EntityDamageRecordCollection DamageRecords => _damageRecords ?? (_damageRecords = new EntityDamageRecordCollection(this));
+
+		/// <summary>
 		/// Determines whether this <see cref="Entity"/> has been damaged by a specified <see cref="Entity"/>.
 		/// </summary>
 		/// <param name="entity">The <see cref="Entity"/> to check</param>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> has been damaged by the specified <see cref="Entity"/>; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> has been damaged by the specified <see cref="Entity"/>; otherwise, <see langword="false" />.
 		/// </returns>
 		public bool HasBeenDamagedBy(Entity entity)
 		{
@@ -545,7 +553,7 @@ namespace GTA
 		/// </summary>
 		/// <param name="weapon">The weapon to check.</param>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> has been damaged by the specified weapon; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> has been damaged by the specified weapon; otherwise, <see langword="false" />.
 		/// </returns>
 		public virtual bool HasBeenDamagedBy(WeaponHash weapon)
 		{
@@ -555,7 +563,7 @@ namespace GTA
 		/// Determines whether this <see cref="Entity"/> has been damaged by any weapon.
 		/// </summary>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> has been damaged by any weapon; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> has been damaged by any weapon; otherwise, <see langword="false" />.
 		/// </returns>
 		public virtual bool HasBeenDamagedByAnyWeapon()
 		{
@@ -565,7 +573,7 @@ namespace GTA
 		/// Determines whether this <see cref="Entity"/> has been damaged by any melee weapon.
 		/// </summary>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> has been damaged by any melee weapon; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> has been damaged by any melee weapon; otherwise, <see langword="false" />.
 		/// </returns>
 		public virtual bool HasBeenDamagedByAnyMeleeWeapon()
 		{
@@ -586,9 +594,10 @@ namespace GTA
 
 		/// <summary>
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is fire proof.
+		/// This <see cref="Entity"/> does not catch fire naturally and <see cref="Ped"/>s do not getting ragdolled for being burned when this property is set to <see langword="true" />.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is fire proof; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is fire proof; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsFireProof
 		{
@@ -623,9 +632,10 @@ namespace GTA
 
 		/// <summary>
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is melee proof.
+		/// <see cref="Ped"/>s are not susceptible to the reactions of melee attacks when this property is set to <see langword="true" />.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is melee proof; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is melee proof; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsMeleeProof
 		{
@@ -662,7 +672,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is bullet proof.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is bullet proof; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is bullet proof; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsBulletProof
 		{
@@ -697,9 +707,10 @@ namespace GTA
 
 		/// <summary>
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is explosion proof.
+		/// Explosions cannot add force to this <see cref="Entity"/> and <see cref="Ped"/>s do not getting ragdolled with explosions when this property is set to <see langword="true" />.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is explosion proof; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is explosion proof; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsExplosionProof
 		{
@@ -734,9 +745,10 @@ namespace GTA
 
 		/// <summary>
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is collision proof.
+		/// Setting this property to <see langword="true" /> only does not prevent this <see cref="Entity"/> from getting ragdolled when another <see cref="Entity"/> collide with this <see cref="Entity"/>.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is collision proof; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is collision proof; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsCollisionProof
 		{
@@ -771,10 +783,10 @@ namespace GTA
 
 		/// <summary>
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is water cannon proof.
-		/// <see cref="Ped"/>s does not get ragdolled by the water jet from fire hydrants when this property is set to <c>true</c>.
+		/// <see cref="Ped"/>s does not get ragdolled by the water jet from fire hydrants when this property is set to <see langword="true" />.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is water cannon proof; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is water cannon proof; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsWaterCannonProof
 		{
@@ -811,7 +823,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is steam proof.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is steam proof; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is steam proof; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsSteamProof
 		{
@@ -848,7 +860,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is smoke proof.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is smoke proof; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is smoke proof; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsSmokeProof
 		{
@@ -883,9 +895,10 @@ namespace GTA
 
 		/// <summary>
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is invincible.
+		/// Setting this property to <see langword="true" /> does not prevent <see cref="Ped"/>s from doing the reactions for getting hit with melee attacks.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is invincible; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is invincible; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsInvincible
 		{
@@ -904,9 +917,10 @@ namespace GTA
 
 		/// <summary>
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> can only be damaged by <see cref="Player"/>s.
+		/// <see cref="Ped"/>s are not susceptible to the reactions of melee attacks when this property is set to <see langword="true" />, unlike <see cref="IsInvincible"/>.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> can only be damaged by <see cref="Player"/>s; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> can only be damaged by <see cref="Player"/>s; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsOnlyDamagedByPlayer
 		{
@@ -918,7 +932,7 @@ namespace GTA
 					return false;
 				}
 
-				return SHVDN.NativeMemory.IsBitSet(address + 392, 9);
+				return SHVDN.NativeMemory.IsBitSet(address + 392, 10);
 			}
 			set => Function.Call(Hash.SET_ENTITY_ONLY_DAMAGED_BY_PLAYER, Handle, value);
 		}
@@ -931,7 +945,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> is visible.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is visible; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is visible; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsVisible
 		{
@@ -943,7 +957,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Entity"/> is occluded.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is occluded; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is occluded; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsOccluded
 		{
@@ -954,7 +968,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Entity"/> is rendered.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is rendered; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is rendered; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsRendered
 		{
@@ -974,7 +988,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Entity"/> is on fire.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is on fire; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is on fire; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsOnFire => Function.Call<bool>(Hash.IS_ENTITY_ON_FIRE, Handle);
 
@@ -982,7 +996,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Entity"/> is on screen.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is on screen; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is on screen; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsOnScreen => Function.Call<bool>(Hash.IS_ENTITY_ON_SCREEN, Handle);
 
@@ -990,7 +1004,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Entity"/> is upright.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is upright; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is upright; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsUpright => Function.Call<bool>(Hash.IS_ENTITY_UPRIGHT, Handle, 30.0f);
 
@@ -998,7 +1012,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Entity"/> is upside down.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is upside down; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is upside down; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsUpsideDown => Function.Call<bool>(Hash.IS_ENTITY_UPSIDEDOWN, Handle);
 
@@ -1006,7 +1020,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Entity"/> is in the air.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Entity"/> is in the air; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> is in the air; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsInAir => Function.Call<bool>(Hash.IS_ENTITY_IN_AIR, Handle);
 
@@ -1014,7 +1028,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Entity"/> is in water.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> is in water; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> is in water; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsInWater => Function.Call<bool>(Hash.IS_ENTITY_IN_WATER, Handle);
 
@@ -1022,7 +1036,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> has gravity.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> has gravity; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> has gravity; otherwise, <see langword="false" />.
 		/// </value>
 		public bool HasGravity
 		{
@@ -1045,7 +1059,7 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Stops all particle effects attached to this <see cref="Entity"/>
+		/// Stops all particle effects attached to this <see cref="Entity"/>.
 		/// </summary>
 		public void RemoveParticleEffects()
 		{
@@ -1060,9 +1074,9 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Entity"/> has collided with anything.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> has collided; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> has collided; otherwise, <see langword="false" />.
 		/// </value>
-		/// <remarks><see cref="IsRecordingCollisions"/> must be <c>true</c> for this to work.</remarks>
+		/// <remarks><see cref="IsRecordingCollisions"/> must be <see langword="true" /> for this to work.</remarks>
 		public bool HasCollided => Function.Call<bool>(Hash.HAS_ENTITY_COLLIDED_WITH_ANYTHING, Handle);
 
 		/// <summary>
@@ -1083,7 +1097,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Entity"/> has collision.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Entity"/> has collision; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Entity"/> has collision; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsCollisionEnabled
 		{
@@ -1103,7 +1117,7 @@ namespace GTA
 		/// Sets the collision between this <see cref="Entity"/> and another <see cref="Entity"/>
 		/// </summary>
 		/// <param name="entity">The <see cref="Entity"/> to set collision with</param>
-		/// <param name="toggle">if set to <c>true</c> the 2 <see cref="Entity"/>s wont collide with each other.</param>
+		/// <param name="toggle">if set to <see langword="true" /> the 2 <see cref="Entity"/>s wont collide with each other.</param>
 		public void SetNoCollision(Entity entity, bool toggle)
 		{
 			Function.Call(Hash.SET_ENTITY_NO_COLLISION_ENTITY, Handle, entity.Handle, toggle);
@@ -1115,7 +1129,7 @@ namespace GTA
 		/// <param name="minBounds">The minimum bounds.</param>
 		/// <param name="maxBounds">The maximum bounds.</param>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> is in the specified area; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> is in the specified area; otherwise, <see langword="false" />.
 		/// </returns>
 		public bool IsInArea(Vector3 minBounds, Vector3 maxBounds)
 		{
@@ -1128,7 +1142,7 @@ namespace GTA
 		/// <param name="edge">The edge.</param>
 		/// <param name="angle">The angle.</param>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> is in the specified angled area; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> is in the specified angled area; otherwise, <see langword="false" />.
 		/// </returns>
 		public bool IsInAngledArea(Vector3 origin, Vector3 edge, float angle)
 		{
@@ -1141,7 +1155,7 @@ namespace GTA
 		/// <param name="position">The position.</param>
 		/// <param name="range">The maximum range.</param>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> is in range of the <paramref name="position"/>; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> is in range of the <paramref name="position"/>; otherwise, <see langword="false" />.
 		/// </returns>
 		public bool IsInRange(Vector3 position, float range)
 		{
@@ -1154,7 +1168,7 @@ namespace GTA
 		/// <param name="entity">The <see cref="Entity"/> to check.</param>
 		/// <param name="bounds">The max displacement from the <paramref name="entity"/>.</param>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> is near the <paramref name="entity"/>; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> is near the <paramref name="entity"/>; otherwise, <see langword="false" />.
 		/// </returns>
 		public bool IsNearEntity(Entity entity, Vector3 bounds)
 		{
@@ -1166,7 +1180,7 @@ namespace GTA
 		/// </summary>
 		/// <param name="model">The <see cref="Model"/> to check</param>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> is touching a <paramref name="model"/>; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> is touching a <paramref name="model"/>; otherwise, <see langword="false" />.
 		/// </returns>
 		public bool IsTouching(Model model)
 		{
@@ -1177,7 +1191,7 @@ namespace GTA
 		/// </summary>
 		/// <param name="entity">The <see cref="Entity"/> to check.</param>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> is touching <paramref name="entity"/>; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> is touching <paramref name="entity"/>; otherwise, <see langword="false" />.
 		/// </returns>
 		public bool IsTouching(Entity entity)
 		{
@@ -1189,7 +1203,7 @@ namespace GTA
 		#region Blips
 
 		/// <summary>
-		/// Creates a <see cref="Blip"/> on this <see cref="Entity"/>
+		/// Creates a <see cref="Blip"/> on this <see cref="Entity"/>.
 		/// </summary>
 		public Blip AddBlip()
 		{
@@ -1199,7 +1213,7 @@ namespace GTA
 		/// <summary>
 		/// Gets the <see cref="Blip"/> attached to this <see cref="Entity"/>.
 		/// </summary>
-		/// <remarks>returns <c>null</c> if no <see cref="Blip"/>s are attached to this <see cref="Entity"/></remarks>
+		/// <remarks>returns <see langword="null" /> if no <see cref="Blip"/>s are attached to this <see cref="Entity"/></remarks>
 		public Blip AttachedBlip
 		{
 			get
@@ -1259,7 +1273,7 @@ namespace GTA
 		/// Determines whether this <see cref="Entity"/> is attached to any other <see cref="Entity"/>.
 		/// </summary>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> is attached to another <see cref="Entity"/>; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> is attached to another <see cref="Entity"/>; otherwise, <see langword="false" />.
 		/// </returns>
 		public bool IsAttached()
 		{
@@ -1270,7 +1284,7 @@ namespace GTA
 		/// </summary>
 		/// <param name="entity">The <see cref="Entity"/> to check if this <see cref="Entity"/> is attached to.</param>
 		/// <returns>
-		///   <c>true</c> if this <see cref="Entity"/> is attached to <paramref name="entity"/>; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Entity"/> is attached to <paramref name="entity"/>; otherwise, <see langword="false" />.
 		/// </returns>
 		public bool IsAttachedTo(Entity entity)
 		{
@@ -1279,7 +1293,7 @@ namespace GTA
 
 		/// <summary>
 		/// Gets the <see cref="Entity"/> this <see cref="Entity"/> is attached to.
-		/// <remarks>returns <c>null</c> if this <see cref="Entity"/> isnt attached to any entity</remarks>
+		/// <remarks>returns <see langword="null" /> if this <see cref="Entity"/> isnt attached to any entity</remarks>
 		/// </summary>
 		public Entity AttachedEntity
 		{
@@ -1314,7 +1328,8 @@ namespace GTA
 		#endregion
 
 		/// <summary>
-		/// Marks this <see cref="Entity"/> as no longer needed letting the game delete it when its too far away.
+		/// Marks this <see cref="Entity"/> as no longer needed to keep and lets the game delete it when its too far away.
+		/// You can still manipulate this <see cref="Entity"/> as long as the <see cref="Entity"/> exists.
 		/// </summary>
 		public void MarkAsNoLongerNeeded()
 		{
@@ -1327,7 +1342,11 @@ namespace GTA
 		}
 
 		/// <summary>
-		/// Destroys this <see cref="Entity"/>.
+		/// <para>Destroys this <see cref="Entity"/> and sets <see cref="PoolObject.Handle"/> to 0.</para>
+		/// <para>
+		/// If you need to remove this <see cref="Entity"/> from collections that use <see cref="object.Equals(object)"/> for equality comparison (e.g. <see cref="System.Collections.Generic.Dictionary{TKey, TValue}"/>),
+		/// remove this <see cref="Entity"/> element from these collections before calling this method.
+		/// </para>
 		/// </summary>
 		public override void Delete()
 		{
@@ -1342,8 +1361,10 @@ namespace GTA
 
 		/// <summary>
 		/// Determines if this <see cref="Entity"/> exists.
+		/// You should ensure <see cref="Entity"/>s still exist before manipulating them or getting some values for them on every tick, since some native functions may crash the game if invalid entity handles are passed.
 		/// </summary>
-		/// <returns><c>true</c> if this <see cref="Entity"/> exists; otherwise, <c>false</c></returns>
+		/// <returns><see langword="true" /> if this <see cref="Entity"/> exists; otherwise, <see langword="false" /></returns>.
+		/// <seealso cref="IsDead"/>
 		public override bool Exists()
 		{
 			return Function.Call<bool>(Hash.DOES_ENTITY_EXIST, Handle);
@@ -1353,7 +1374,7 @@ namespace GTA
 		/// Determines if an <see cref="object"/> refers to the same entity as this <see cref="Entity"/>.
 		/// </summary>
 		/// <param name="obj">The <see cref="object"/> to check.</param>
-		/// <returns><c>true</c> if the <paramref name="obj"/> is the same entity as this <see cref="Entity"/>; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if the <paramref name="obj"/> is the same entity as this <see cref="Entity"/>; otherwise, <see langword="false" />.</returns>
 		public override bool Equals(object obj)
 		{
 			if (obj is Entity entity)
@@ -1369,7 +1390,7 @@ namespace GTA
 		/// </summary>
 		/// <param name="left">The left <see cref="Entity"/>.</param>
 		/// <param name="right">The right <see cref="Entity"/>.</param>
-		/// <returns><c>true</c> if <paramref name="left"/> is the same entity as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if <paramref name="left"/> is the same entity as <paramref name="right"/>; otherwise, <see langword="false" />.</returns>
 		public static bool operator ==(Entity left, Entity right)
 		{
 			return left is null ? right is null : left.Equals(right);
@@ -1379,7 +1400,7 @@ namespace GTA
 		/// </summary>
 		/// <param name="left">The left <see cref="Entity"/>.</param>
 		/// <param name="right">The right <see cref="Entity"/>.</param>
-		/// <returns><c>true</c> if <paramref name="left"/> is not the same entity as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if <paramref name="left"/> is not the same entity as <paramref name="right"/>; otherwise, <see langword="false" />.</returns>
 		public static bool operator !=(Entity left, Entity right)
 		{
 			return !(left == right);

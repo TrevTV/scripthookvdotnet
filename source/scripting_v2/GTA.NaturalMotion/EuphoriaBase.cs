@@ -3,6 +3,7 @@
 // License: https://github.com/crosire/scripthookvdotnet#license
 //
 
+using System;
 using System.Collections.Generic;
 using GTA.Math;
 using GTA.Native;
@@ -16,7 +17,8 @@ namespace GTA.NaturalMotion
 	{
 		#region Fields
 		readonly string _message;
-		readonly Dictionary<string, object> _arguments;
+		readonly Dictionary<string, (int value, Type type)> _BoolIntFloatArguments;
+		readonly Dictionary<string, object> _StringVector3ArrayArguments;
 		private static readonly Dictionary<string, object> _stopArgument = new Dictionary<string, object>() { { "start", false } };
 		#endregion
 
@@ -27,7 +29,8 @@ namespace GTA.NaturalMotion
 		public Message(string message)
 		{
 			_message = message;
-			_arguments = new Dictionary<string, object>();
+			_BoolIntFloatArguments = new Dictionary<string, (int value, Type type)>();
+			_StringVector3ArrayArguments = new Dictionary<string, object>();
 		}
 
 		/// <summary>
@@ -36,7 +39,7 @@ namespace GTA.NaturalMotion
 		/// <param name="target">The <see cref="Ped"/> to send the Abort <see cref="Message"/> to.</param>
 		public void Abort(Ped target)
 		{
-			SHVDN.NativeMemory.SendEuphoriaMessage(target.Handle, _message, _stopArgument);
+			SHVDN.NativeMemory.SendEuphoriaMessage(target.Handle, _message, null, _stopArgument);
 		}
 
 		/// <summary>
@@ -45,19 +48,7 @@ namespace GTA.NaturalMotion
 		/// <param name="target">The <see cref="Ped"/> to send the <see cref="Message"/> to.</param>
 		public void SendTo(Ped target)
 		{
-			if (!target.IsRagdoll)
-			{
-				if (!target.CanRagdoll)
-				{
-					target.CanRagdoll = true;
-				}
-
-				Function.Call(Hash.SET_PED_TO_RAGDOLL, target.Handle, 10000, -1, 1, 1, 1, 0);
-			}
-
-			SetArgument("start", true);
-
-			SHVDN.NativeMemory.SendEuphoriaMessage(target.Handle, _message, _arguments);
+			SendTo(target, -1);
 		}
 		/// <summary>
 		///	Starts this Natural Motion behavior on the <see cref="Ped"/> for a specified duration.
@@ -66,14 +57,19 @@ namespace GTA.NaturalMotion
 		/// <param name="duration">How long to apply the behavior for (-1 for looped).</param>
 		public void SendTo(Ped target, int duration)
 		{
-			if (!target.CanRagdoll)
+			if (!target.IsRagdoll)
 			{
-				target.CanRagdoll = true;
+				if (!target.CanRagdoll)
+				{
+					target.CanRagdoll = true;
+				}
+
+				Function.Call(Hash.SET_PED_TO_RAGDOLL, target.Handle, 10000, duration, 1, 1, 1, 0);
 			}
 
-			Function.Call(Hash.SET_PED_TO_RAGDOLL, target.Handle, 10000, duration, 1, 1, 1, 0);
+			SetArgument("start", true);
 
-			SendTo(target);
+			SHVDN.NativeMemory.SendEuphoriaMessage(target.Handle, _message, _BoolIntFloatArguments, _StringVector3ArrayArguments);
 		}
 
 		/// <summary>
@@ -83,7 +79,8 @@ namespace GTA.NaturalMotion
 		/// <param name="value">The value to set the argument to.</param>
 		public void SetArgument(string message, bool value)
 		{
-			_arguments[message] = value;
+			int valueConverted = value ? 1 : 0;
+			_BoolIntFloatArguments[message] = (valueConverted, typeof(bool));
 		}
 		/// <summary>
 		/// Sets a <see cref="Message"/> argument to a <see cref="int"/> value.
@@ -92,7 +89,7 @@ namespace GTA.NaturalMotion
 		/// <param name="value">The value to set the argument to.</param>
 		public void SetArgument(string message, int value)
 		{
-			_arguments[message] = value;
+			_BoolIntFloatArguments[message] = (value, typeof(int));
 		}
 		/// <summary>
 		/// Sets a <see cref="Message"/> argument to a <see cref="float"/> value.
@@ -101,7 +98,11 @@ namespace GTA.NaturalMotion
 		/// <param name="value">The value to set the argument to.</param>
 		public void SetArgument(string message, float value)
 		{
-			_arguments[message] = value;
+			unsafe
+			{
+				int valueConverted = *(int*)&value;
+				_BoolIntFloatArguments[message] = (valueConverted, typeof(float));
+			}
 		}
 		/// <summary>
 		/// Sets a <see cref="Message"/> argument to a <see cref="string"/> value.
@@ -110,7 +111,7 @@ namespace GTA.NaturalMotion
 		/// <param name="value">The value to set the argument to.</param>
 		public void SetArgument(string message, string value)
 		{
-			_arguments[message] = value;
+			_StringVector3ArrayArguments[message] = value;
 		}
 		/// <summary>
 		/// Sets a <see cref="Message"/> argument to a <see cref="Vector3"/> value.
@@ -119,7 +120,7 @@ namespace GTA.NaturalMotion
 		/// <param name="value">The value to set the argument to.</param>
 		public void SetArgument(string message, Vector3 value)
 		{
-			_arguments[message] = value.ToArray();
+			_StringVector3ArrayArguments[message] = value;
 		}
 
 		/// <summary>
@@ -127,7 +128,8 @@ namespace GTA.NaturalMotion
 		/// </summary>
 		public void ResetArguments()
 		{
-			_arguments.Clear();
+			_BoolIntFloatArguments.Clear();
+			_StringVector3ArrayArguments.Clear();
 		}
 
 		/// <summary>

@@ -43,8 +43,9 @@ namespace GTA
 
 		/// <summary>
 		/// Determines if this <see cref="Vehicle"/> exists.
+		/// You should ensure <see cref="Vehicle"/>s still exist before manipulating them or getting some values for them on every tick, since some native functions may crash the game if invalid entity handles are passed.
 		/// </summary>
-		/// <returns><c>true</c> if this <see cref="Vehicle"/> exists; otherwise, <c>false</c></returns>
+		/// <returns><see langword="true" /> if this <see cref="Vehicle"/> exists; otherwise, <see langword="false" /></returns>
 		public new bool Exists()
 		{
 			return EntityType == EntityType.Vehicle;
@@ -98,6 +99,154 @@ namespace GTA
 		#region Configuration
 
 		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a regular automobile.
+		/// </summary>
+		public bool IsRegularAutomobile => Type == VehicleType.Automobile;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is an amphibious automobile.
+		/// </summary>
+		public bool IsAmphibiousAutomobile => Type == VehicleType.AmphibiousAutomobile;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a submarine car.
+		/// </summary>
+		public bool IsSubmarineCar => Type == VehicleType.SubmarineCar;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is an automobile.
+		/// </summary>
+		public bool IsAutomobile
+		{
+			get
+			{
+				var vehicleType = Type;
+				return (vehicleType == VehicleType.Automobile || vehicleType == VehicleType.AmphibiousAutomobile || vehicleType == VehicleType.SubmarineCar);
+			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a regular quad bike.
+		/// </summary>
+		public bool IsRegularQuadBike => Type == VehicleType.QuadBike;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is an amphibious quad bike.
+		/// </summary>
+		public bool IsAmphibiousQuadBike => Type == VehicleType.AmphibiousQuadBike;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a quad bike.
+		/// </summary>
+		public bool IsQuadBike
+		{
+			get
+			{
+				var vehicleType = Type;
+				return (vehicleType == VehicleType.QuadBike || vehicleType == VehicleType.AmphibiousQuadBike);
+			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is an amphibious vehicle.
+		/// </summary>
+		public bool IsAmphibious
+		{
+			get
+			{
+				var vehicleType = Type;
+				return (vehicleType == VehicleType.AmphibiousAutomobile || vehicleType == VehicleType.AmphibiousQuadBike);
+			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a trailer.
+		/// </summary>
+		public bool IsTrailer => Type == VehicleType.Trailer;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a plane.
+		/// </summary>
+		public bool IsPlane => Type == VehicleType.Plane;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a helicopter.
+		/// </summary>
+		public bool IsHelicopter => Type == VehicleType.Helicopter;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a helicopter.
+		/// </summary>
+		public bool IsBlimp => Type == VehicleType.Blimp;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is an aircraft.
+		/// </summary>
+		public bool IsAircraft
+		{
+			get
+			{
+				var vehicleType = Type;
+				return (vehicleType == VehicleType.Plane || vehicleType == VehicleType.Helicopter || vehicleType == VehicleType.Blimp);
+			}
+		}
+
+		private bool IsHeliOrBlimp
+		{
+			get
+			{
+				var vehicleType = Type;
+				return ((uint)vehicleType - 8) <= 1;
+			}
+		}
+
+		private bool IsRotaryWingAircraft
+		{
+			get
+			{
+				var vehicleType = Type;
+				return ((uint)vehicleType - 8) <= 2;
+			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a motorcycle.
+		/// </summary>
+		public bool IsMotorcycle => Type == VehicleType.Motorcycle;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a bicycle.
+		/// </summary>
+		public bool IsBycicle => Type == VehicleType.Bycicle;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a bike.
+		/// </summary>
+		public bool IsBike
+		{
+			get
+			{
+				var vehicleType = Type;
+				return (vehicleType == VehicleType.Motorcycle || vehicleType == VehicleType.Bycicle);
+			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a boat.
+		/// </summary>
+		public bool IsBoat => Type == VehicleType.Motorcycle;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a train.
+		/// </summary>
+		public bool IsTrain => Type == VehicleType.Bycicle;
+
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Vehicle"/> is a submarine.
+		/// </summary>
+		public bool IsSubmarine => Type == VehicleType.Submarine;
+
+		/// <summary>
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> was stolen.
 		/// </summary>
 		public bool IsStolen
@@ -110,7 +259,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> is wanted by the police.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> is wanted by the police; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> is wanted by the police; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsWanted
 		{
@@ -131,7 +280,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> needs to be hotwired to start.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> needs to be hotwired to start; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> needs to be hotwired to start; otherwise, <see langword="false" />.
 		/// </value>
 		public bool NeedsToBeHotwired
 		{
@@ -152,7 +301,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> was previously owned by a <see cref="Player"/>.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Vehicle"/> was previously owned by a <see cref="Player"/>; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Vehicle"/> was previously owned by a <see cref="Player"/>; otherwise, <see langword="false" />.
 		/// </value>
 		public bool PreviouslyOwnedByPlayer
 		{
@@ -173,7 +322,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Vehicle"/> allows <see cref="Ped"/>s to rappel.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Vehicle"/> allows <see cref="Ped"/>s to rappel; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Vehicle"/> allows <see cref="Ped"/>s to rappel; otherwise, <see langword="false" />.
 		/// </value>
 		public bool AllowRappel => Game.Version >= GameVersion.v1_0_757_2_Steam
 			? Function.Call<bool>(Hash._DOES_VEHICLE_ALLOW_RAPPEL, Handle)
@@ -183,7 +332,7 @@ namespace GTA
 		/// Gets a value indicating whether <see cref="Ped"/>s can stand on this <see cref="Vehicle"/> regardless of <see cref="Vehicle"/>s speed.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if <see cref="Ped"/>s can stand on this <see cref="Vehicle"/> regardless of <see cref="Vehicle"/>s speed; otherwise, <c>false</c>.
+		/// <see langword="true" /> if <see cref="Ped"/>s can stand on this <see cref="Vehicle"/> regardless of <see cref="Vehicle"/>s speed; otherwise, <see langword="false" />.
 		/// </value>
 		public bool CanStandOnTop => SHVDN.NativeMemory.HasVehicleFlag(Model.Hash, NativeMemory.VehicleFlag1.CanStandOnTop);
 
@@ -191,7 +340,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Vehicle"/> can jump.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Vehicle"/> can jump; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Vehicle"/> can jump; otherwise, <see langword="false" />.
 		/// </value>
 		public bool CanJump => Game.Version >= GameVersion.v1_0_944_2_Steam && Function.Call<bool>(Hash._GET_CAN_VEHICLE_JUMP, Handle);
 
@@ -220,26 +369,34 @@ namespace GTA
 		/// </summary>
 		public VehicleClass ClassType => Function.Call<VehicleClass>(Hash.GET_VEHICLE_CLASS, Handle);
 
+		/// <summary>
+		/// Gets the type of this <see cref="Vehicle"/>.
+		/// </summary>
+		public VehicleType Type
+		{
+			get
+			{
+				var address = MemoryAddress;
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.VehicleTypeOffsetInCVehicle == 0)
+				{
+					return VehicleType.Invalid;
+				}
+
+				return (VehicleType)SHVDN.NativeMemory.ReadInt32(address + SHVDN.NativeMemory.VehicleTypeOffsetInCVehicle);
+			}
+		}
+
 		public float LodMultiplier
 		{
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.VehicleLodMultiplierOffset == 0)
 				{
 					return 0.0f;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1204 : 0x11F4; // untested
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x1224 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x1264 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x1274 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x12A8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x12C8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x1328 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x1368 : offset;
-
-				return SHVDN.NativeMemory.ReadFloat(address + offset);
+				return SHVDN.NativeMemory.ReadFloat(address + SHVDN.NativeMemory.VehicleLodMultiplierOffset);
 			}
 			set => Function.Call(Hash.SET_VEHICLE_LOD_MULTIPLIER, Handle, value);
 		}
@@ -296,31 +453,22 @@ namespace GTA
 		{
 			get
 			{
-				if (!Model.IsHelicopter)
+				if (!IsHeliOrBlimp)
 				{
 					return 0.0f;
 				}
 
-				return Function.Call<float>(Hash._GET_HELI_ENGINE_HEALTH, Handle);
+				return Function.Call<float>(Hash.GET_HELI_TAIL_BOOM_HEALTH, Handle);
 			}
 			set
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero || !Model.IsHelicopter)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.HeliTailBoomHealthOffset == 0 || !IsHeliOrBlimp)
 				{
 					return;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1754 : 0x1744; // untested
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x1774 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x1824 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x1854 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x18F4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x19F8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x1AB8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x1AF8 : offset;
-
-				SHVDN.NativeMemory.WriteFloat(address + offset, value);
+				SHVDN.NativeMemory.WriteFloat(address + SHVDN.NativeMemory.HeliTailBoomHealthOffset, value);
 			}
 		}
 
@@ -331,7 +479,7 @@ namespace GTA
 		{
 			get
 			{
-				if (!Model.IsHelicopter)
+				if (!IsHeliOrBlimp)
 				{
 					return 0.0f;
 				}
@@ -341,21 +489,12 @@ namespace GTA
 			set
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero || !Model.IsHelicopter)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.HeliMainRotorHealthOffset == 0 || !IsHeliOrBlimp)
 				{
 					return;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x174C : 0x173C; // untested
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x176C : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x181C : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x184C : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x18EC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x19F0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x1AB0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x1AF0 : offset;
-
-				SHVDN.NativeMemory.WriteFloat(address + offset, value);
+				SHVDN.NativeMemory.WriteFloat(address + SHVDN.NativeMemory.HeliMainRotorHealthOffset, value);
 			}
 		}
 
@@ -366,7 +505,7 @@ namespace GTA
 		{
 			get
 			{
-				if (!Model.IsHelicopter)
+				if (!IsHeliOrBlimp)
 				{
 					return 0.0f;
 				}
@@ -376,21 +515,12 @@ namespace GTA
 			set
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero || !Model.IsHelicopter)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.HeliTailRotorHealthOffset == 0 || !IsHeliOrBlimp)
 				{
 					return;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1750 : 0x1740; // untested
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x1770 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x1820 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x1850 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x18F0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x19F4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x1AB4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x1AF4 : offset;
-
-				SHVDN.NativeMemory.WriteFloat(address + offset, value);
+				SHVDN.NativeMemory.WriteFloat(address + SHVDN.NativeMemory.HeliTailRotorHealthOffset, value);
 			}
 		}
 
@@ -432,7 +562,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/>s engine is running.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Vehicle"/>s engine is running; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Vehicle"/>s engine is running; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsEngineRunning
 		{
@@ -444,7 +574,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/>s engine is currently starting.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Vehicle"/>s engine is starting; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Vehicle"/>s engine is starting; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsEngineStarting
 		{
@@ -487,28 +617,19 @@ namespace GTA
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.EngineTemperatureOffset == 0)
 				{
 					return 0.0f;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x9D0 : 0x9C0; // untested
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x9F0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0xA18 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0xA28 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0xA48 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0xA70 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0xAC0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0xAE8 : offset;
-
-				return SHVDN.NativeMemory.ReadFloat(address + offset);
+				return SHVDN.NativeMemory.ReadFloat(address + SHVDN.NativeMemory.EnginePowerMultiplierOffset);
 			}
 			set => Function.Call(Hash.MODIFY_VEHICLE_TOP_SPEED, Handle, value);
 		}
 
 		public float EngineTorqueMultiplier
 		{
-			set => Function.Call(Hash._SET_VEHICLE_ENGINE_TORQUE_MULTIPLIER, Handle, value);
+			set => Function.Call(Hash.SET_VEHICLE_CHEAT_POWER_INCREASE, Handle, value);
 		}
 
 		/// <summary>
@@ -520,40 +641,22 @@ namespace GTA
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.OilLevelOffset == 0)
 				{
 					return 0.0f;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x76C : 0x75C;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x78C : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x7AC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x7BC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x7D8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x7E8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x838 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x858 : offset;
-
-				return SHVDN.NativeMemory.ReadFloat(address + offset);
+				return SHVDN.NativeMemory.ReadFloat(address + SHVDN.NativeMemory.OilLevelOffset);
 			}
 			set
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.OilLevelOffset == 0)
 				{
 					return;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x76C : 0x75C;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x78C : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x7AC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x7BC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x7D8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x7E8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x838 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x858 : offset;
-
-				SHVDN.NativeMemory.WriteFloat(address + offset, value);
+				SHVDN.NativeMemory.WriteFloat(address + SHVDN.NativeMemory.OilLevelOffset, value);
 			}
 		}
 
@@ -625,46 +728,11 @@ namespace GTA
 		/// <summary>
 		/// Gets or sets the gears value of this <see cref="Vehicle"/>.
 		/// </summary>
+		[Obsolete("Vehicle.Gears is obsolete, please use Vehicle.HighGear for the high gear value and Vehicle.CurrentGear for the current gear value instead.")]
 		public int Gears
 		{
-			get
-			{
-				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
-				{
-					return 0;
-				}
-
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x7A0 : 0x790;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x7C0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x7E0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x7F0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x810 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x830 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x870 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x890 : offset;
-
-				return SHVDN.NativeMemory.ReadInt32(address + offset);
-			}
-			set
-			{
-				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
-				{
-					return;
-				}
-
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x7A0 : 0x790;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x7C0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x7E0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x7F0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x810 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x830 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x870 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x890 : offset;
-
-				SHVDN.NativeMemory.WriteInt32(address + offset, value);
-			}
+			get => HighGear;
+			set => HighGear = value;
 		}
 
 		public int HighGear
@@ -949,25 +1017,16 @@ namespace GTA
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero || !Model.IsHelicopter)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.HeliBladesSpeedOffset == 0 || !IsRotaryWingAircraft)
 				{
 					return 0.0f;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1740 : 0x1730; // untested
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x1760 : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x1810 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x1840 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x18E0 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x19E4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x1AA8 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x1AE4 : offset;
-
-				return SHVDN.NativeMemory.ReadFloat(address + offset);
+				return SHVDN.NativeMemory.ReadFloat(address + SHVDN.NativeMemory.HeliBladesSpeedOffset);
 			}
 			set
 			{
-				if (!Model.IsHelicopter)
+				if (!IsRotaryWingAircraft)
 				{
 					return;
 				}
@@ -1089,7 +1148,7 @@ namespace GTA
 		/// Sets a value indicating whether this <see cref="Vehicle"/> has an alarm set.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has an alarm set; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has an alarm set; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsAlarmSet
 		{
@@ -1109,7 +1168,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Vehicle"/> is sounding its alarm.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> is sounding its alarm; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> is sounding its alarm; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsAlarmSounding => Function.Call<bool>(Hash.IS_VEHICLE_ALARM_ACTIVATED, Handle);
 
@@ -1162,7 +1221,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Vehicle"/> has a siren.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has a siren; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has a siren; otherwise, <see langword="false" />.
 		/// </value>
 		public bool HasSiren => Bones.Contains("siren1");
 
@@ -1170,7 +1229,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> has its siren turned on.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has its siren turned on; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has its siren turned on; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsSirenActive
 		{
@@ -1181,11 +1240,11 @@ namespace GTA
 		/// Sets a value indicating whether the siren on this <see cref="Vehicle"/> plays sounds.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if the siren on this <see cref="Vehicle"/> plays sounds; otherwise, <c>false</c>.
+		/// <see langword="true" /> if the siren on this <see cref="Vehicle"/> plays sounds; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsSirenSilent
 		{
-			set => Function.Call(Hash._SET_DISABLE_VEHICLE_SIREN_SOUND, Handle, value);
+			set => Function.Call(Hash.SET_VEHICLE_HAS_MUTED_SIRENS, Handle, value);
 		}
 
 		/// <summary>
@@ -1205,7 +1264,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> has its lights on.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has its lights on; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has its lights on; otherwise, <see langword="false" />.
 		/// </value>
 		public bool AreLightsOn
 		{
@@ -1226,7 +1285,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> has its high beams on.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has its high beams on; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has its high beams on; otherwise, <see langword="false" />.
 		/// </value>
 		public bool AreHighBeamsOn
 		{
@@ -1247,7 +1306,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> has its interior lights on.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has its interior lights on; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has its interior lights on; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsInteriorLightOn
 		{
@@ -1268,7 +1327,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> has its search light on.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has its search light on; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has its search light on; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsSearchLightOn
 		{
@@ -1280,7 +1339,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> has its taxi light on.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has its taxi light on; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has its taxi light on; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsTaxiLightOn
 		{
@@ -1292,7 +1351,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> has its left indicator light on.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has its left indicator light on; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has its left indicator light on; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsLeftIndicatorLightOn
 		{
@@ -1303,7 +1362,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> has its right indicator light on.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has its right indicator light on; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has its right indicator light on; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsRightIndicatorLightOn
 		{
@@ -1314,7 +1373,7 @@ namespace GTA
 		/// Gets or sets a value indicating whether this <see cref="Vehicle"/> has its brake light on.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has its brake light on; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has its brake light on; otherwise, <see langword="false" />.
 		/// </value>
 		public bool AreBrakeLightsOn
 		{
@@ -1326,21 +1385,12 @@ namespace GTA
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.VehicleLightsMultiplierOffset == 0)
 				{
 					return 0.0f;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x90C : 0x8FC; // untested
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x92C : offset;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x954 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x964 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x984 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x9A4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x9F4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0xA14 : offset;
-
-				return SHVDN.NativeMemory.ReadFloat(address + offset);
+				return SHVDN.NativeMemory.ReadFloat(address + SHVDN.NativeMemory.VehicleLightsMultiplierOffset);
 			}
 			set => Function.Call(Hash.SET_VEHICLE_LIGHT_MULTIPLIER, Handle, value);
 		}
@@ -1362,27 +1412,18 @@ namespace GTA
 			set
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.IsHeadlightDamagedOffset == 0)
 				{
 					return;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x77C : 0x76C;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x79C : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x7BC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x7CC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x7EC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x80C : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x84C : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x86C : offset;
-
 				if (value)
 				{
-					SHVDN.NativeMemory.SetBit(address + offset, 0);
+					SHVDN.NativeMemory.SetBit(address + SHVDN.NativeMemory.IsHeadlightDamagedOffset, 0);
 				}
 				else
 				{
-					SHVDN.NativeMemory.ClearBit(address + offset, 0);
+					SHVDN.NativeMemory.ClearBit(address + SHVDN.NativeMemory.IsHeadlightDamagedOffset, 0);
 				}
 			}
 		}
@@ -1393,27 +1434,18 @@ namespace GTA
 			set
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.IsHeadlightDamagedOffset == 0)
 				{
 					return;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x77C : 0x76C;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x79C : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x7BC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x7CC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x7EC : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x80C : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x84C : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x86C : offset;
-
 				if (value)
 				{
-					SHVDN.NativeMemory.SetBit(address + offset, 1);
+					SHVDN.NativeMemory.SetBit(address + SHVDN.NativeMemory.IsHeadlightDamagedOffset, 1);
 				}
 				else
 				{
-					SHVDN.NativeMemory.ClearBit(address + offset, 1);
+					SHVDN.NativeMemory.ClearBit(address + SHVDN.NativeMemory.IsHeadlightDamagedOffset, 1);
 				}
 			}
 		}
@@ -1438,21 +1470,12 @@ namespace GTA
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.CanWheelBreakOffset == 0)
 				{
 					return false;
 				}
 
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x83B : 0x82B; // untested
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x85B : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x883 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x893 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x8B3 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x8D3 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x923 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x943 : offset;
-
-				return !SHVDN.NativeMemory.IsBitSet(address + offset, 6);
+				return !SHVDN.NativeMemory.IsBitSet(address + SHVDN.NativeMemory.CanWheelBreakOffset, 6);
 			}
 			set => Function.Call(Hash.SET_VEHICLE_WHEELS_CAN_BREAK, Handle, value);
 		}
@@ -1467,33 +1490,22 @@ namespace GTA
 		/// Only works when the vehicle model is a car, quad bikes or trikes (strictly when the internal vehicle class is CAutomobile or derived class from CAutomobile).
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this <see cref="Vehicle"/> drops money when destroyed; otherwise, <c>false</c>.
+		/// <see langword="true" /> if this <see cref="Vehicle"/> drops money when destroyed; otherwise, <see langword="false" />.
 		/// </value>
 		public bool DropsMoneyOnExplosion
 		{
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.VehicleDropsMoneyWhenBlownUpOffset == 0)
 				{
 					return false;
 				}
 
-				var model = Model;
-
-				// check if the vehicle is CAutomobile or a derived class from it
-				if (model.IsCar || model.IsQuadBike ||
-					(Game.Version >= GameVersion.v1_0_944_2_Steam && model.IsAmphibiousCar) ||
-					(Game.Version >= GameVersion.v1_0_944_2_Steam && model.IsAmphibiousQuadBike))
+				// Check if the vehicle class is CAutomobile or a subclass of it
+				if ((uint)Type <= 10)
 				{
-					int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x1319 : 0x12F9;
-					offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x1349 : offset;
-					offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x13B9 : offset;
-					offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x1409 : offset;
-					offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x1459 : offset;
-					offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x1539 : offset;
-
-					return SHVDN.NativeMemory.IsBitSet(address + offset, 1);
+					return SHVDN.NativeMemory.IsBitSet(address + SHVDN.NativeMemory.VehicleDropsMoneyWhenBlownUpOffset, 1);
 				}
 
 				return false;
@@ -1591,7 +1603,7 @@ namespace GTA
 		/// Sets a value indicating whether the Handbrake on this <see cref="Vehicle"/> is forced on.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if the Handbrake on this <see cref="Vehicle"/> is forced on; otherwise, <c>false</c>.
+		///   <see langword="true" /> if the Handbrake on this <see cref="Vehicle"/> is forced on; otherwise, <see langword="false" />.
 		/// </value>
 		public bool IsHandbrakeForcedOn
 		{
@@ -1745,29 +1757,19 @@ namespace GTA
 		/// Gets or sets a value indicating whether peds can use this <see cref="Vehicle"/> for cover.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if peds can use this <see cref="Vehicle"/> for cover; otherwise, <c>false</c>.
+		///   <see langword="true" /> if peds can use this <see cref="Vehicle"/> for cover; otherwise, <see langword="false" />.
 		/// </value>
 		public bool ProvidesCover
 		{
 			get
 			{
 				var address = MemoryAddress;
-				if (address == IntPtr.Zero)
+				if (address == IntPtr.Zero || SHVDN.NativeMemory.VehicleProvidesCoverOffset == 0)
 				{
 					return false;
 				}
 
-				// Unsure of the exact version this switched, but all others in the rangs are the same
-				int offset = Game.Version >= GameVersion.v1_0_372_2_Steam ? 0x83C : 0x82C;
-				offset = Game.Version >= GameVersion.v1_0_877_1_Steam ? 0x85C : offset;
-				offset = Game.Version >= GameVersion.v1_0_944_2_Steam ? 0x884 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1103_2_Steam ? 0x894 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1180_2_Steam ? 0x8B4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1290_1_Steam ? 0x8D4 : offset;
-				offset = Game.Version >= GameVersion.v1_0_1604_0_Steam ? 0x924 : offset;
-				offset = Game.Version >= GameVersion.v1_0_2060_0_Steam ? 0x944 : offset;
-
-				return SHVDN.NativeMemory.IsBitSet(address + offset, 2);
+				return SHVDN.NativeMemory.IsBitSet(address + SHVDN.NativeMemory.VehicleProvidesCoverOffset, 2);
 			}
 			set => Function.Call(Hash.SET_VEHICLE_PROVIDES_COVER, Handle, value);
 		}
@@ -1780,7 +1782,7 @@ namespace GTA
 		/// Gets a value indicating whether this <see cref="Vehicle"/> has forks.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if this <see cref="Vehicle"/> has forks; otherwise, <c>false</c>.
+		///   <see langword="true" /> if this <see cref="Vehicle"/> has forks; otherwise, <see langword="false" />.
 		/// </value>
 		public bool HasForks => Bones.Contains("forks");
 
@@ -1844,7 +1846,7 @@ namespace GTA
 
 		public void SetHeliYawPitchRollMult(float mult)
 		{
-			if (Model.IsHelicopter && mult >= 0.0f && mult <= 1.0f)
+			if (IsHeliOrBlimp && mult >= 0.0f && mult <= 1.0f)
 			{
 				Function.Call(Hash._SET_HELICOPTER_ROLL_PITCH_YAW_MULT, Handle, mult);
 			}
@@ -1922,6 +1924,10 @@ namespace GTA
 		{
 			return Function.Call<VehicleClass>(Hash.GET_VEHICLE_CLASS_FROM_NAME, vehicleModel.Hash);
 		}
+		public static VehicleType GetModelType(Model vehicleModel)
+		{
+			return (VehicleType)SHVDN.NativeMemory.GetVehicleType(vehicleModel);
+		}
 
 		public static int[] GetAllModelValues()
 		{
@@ -1942,9 +1948,26 @@ namespace GTA
 			}
 			return allModels.ToArray();
 		}
+
+		/// <summary>
+		/// Gets an <c>array</c> of all loaded <see cref="VehicleHash"/>s that is appropriate to spawn as ambient vehicles.
+		/// All the model hashes of the elements are loaded and the <see cref="Vehicle"/>s with the model hashes can be spawned immediately.
+		/// </summary>
+		public static VehicleHash[] GetAllLoadedModelsAppropriateForAmbientVehicles()
+		{
+			return SHVDN.NativeMemory.GetLoadedAppropriateVehicleHashes()
+				.Select(x => (VehicleHash)x)
+				.ToArray();
+		}
+
 		public static VehicleHash[] GetAllModelsOfClass(VehicleClass vehicleClass)
 		{
 			return Array.ConvertAll(SHVDN.NativeMemory.VehicleModels[(int)vehicleClass].ToArray(), item => (VehicleHash)item);
+		}
+
+		public static VehicleHash[] GetAllModelsOfType(VehicleType vehicleType)
+		{
+			return Array.ConvertAll(SHVDN.NativeMemory.VehicleModelsGroupedByType[(int)vehicleType].ToArray(), item => (VehicleHash)item);
 		}
 	}
 }

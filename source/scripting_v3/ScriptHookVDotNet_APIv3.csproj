@@ -92,10 +92,13 @@
     <Compile Include="GTA\CheckpointCustomIcon.cs" />
     <Compile Include="GTA\CheckpointCustomIconStyle.cs" />
     <Compile Include="GTA\CheckpointIcon.cs" />
+    <Compile Include="GTA\Entities\Vehicles\VehicleType.cs" />
+    <Compile Include="GTA\PlayerTargetingMode.cs" />
     <Compile Include="GTA\Control.cs" />
     <Compile Include="GTA\Entities\Entity.cs" />
     <Compile Include="GTA\Entities\EntityBone.cs" />
     <Compile Include="GTA\Entities\EntityBoneCollection.cs" />
+    <Compile Include="GTA\Entities\EntityDamageRecord.cs" />
     <Compile Include="GTA\Entities\EntityType.cs" />
     <Compile Include="GTA\Entities\Model.cs" />
     <Compile Include="GTA\Entities\Peds\AnimationFlags.cs" />
@@ -127,6 +130,7 @@
     <Compile Include="GTA\Entities\Peds\TaskInvoker.cs" />
     <Compile Include="GTA\Entities\Peds\TaskSequence.cs" />
     <Compile Include="GTA\Entities\Peds\VehicleDrivingFlags.cs" />
+    <Compile Include="GTA\Entities\Projectile.cs" />
     <Compile Include="GTA\Entities\Prop.cs" />
     <Compile Include="GTA\Entities\Vehicles\CargobobHook.cs" />
     <Compile Include="GTA\Entities\Vehicles\HandlingData.cs" />
@@ -167,6 +171,7 @@
     <Compile Include="GTA\Language.cs" />
     <Compile Include="GTA\MarkerType.cs" />
     <Compile Include="GTA\MaterialHash.cs" />
+    <Compile Include="GTA\MeasurementSystem.cs" />
     <Compile Include="GTA\ParachuteTint.cs" />
     <Compile Include="GTA\Particles\ParticleEffect.cs" />
     <Compile Include="GTA\Particles\ParticleEffectAsset.cs" />
@@ -175,7 +180,9 @@
     <Compile Include="GTA\Player.cs" />
     <Compile Include="GTA\PoolObject.cs" />
     <Compile Include="GTA\RadioStation.cs" />
+    <Compile Include="GTA\Entities\EntityDamageRecordCollection.cs" />
     <Compile Include="GTA\RaycastResult.cs" />
+    <Compile Include="GTA\GameVersionNotSupportedException.cs" />
     <Compile Include="GTA\RequireScript.cs" />
     <Compile Include="GTA\Rope.cs" />
     <Compile Include="GTA\RopeType.cs" />
